@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../../domain/entities/pokemon.dart';
-//import '../models/pokemon_model.dart';
+import 'package:untitled/data/models/pokemon_model.dart';
+
 
 abstract class PokemonRemoteDataSource {
-  Future<List<Pokemon>> getAllPokemons();
+  Future<List<PokemonModel>> getAllPokemons();
 }
 
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
@@ -13,7 +13,7 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
   PokemonRemoteDataSourceImpl({required this.client});
 
   @override
-  Future<List<Pokemon>> getAllPokemons() async {
+  Future<List<PokemonModel>> getAllPokemons() async {
     final response = await client.get(
       Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=100'),
       headers: {'Content-Type': 'application/json'},
@@ -21,7 +21,7 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(response.body)['results'];
-      return jsonList.map((json) => Pokemon.fromJson(json)).toList();
+      return jsonList.map((json) => PokemonModel.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load pokemons');
     }

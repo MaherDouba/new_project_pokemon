@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
+import '../../data/datasources/pokemon_local_datasource.dart';
 import '../../data/datasources/pokemon_remote_datasource.dart';
 import '../../data/repositories/pokemon_repository_impl.dart';
 import '../../domain/repositories/pokemon_repository.dart';
@@ -14,13 +15,19 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<PokemonRemoteDataSource>(
     () => PokemonRemoteDataSourceImpl(client: getIt()),
   );
+
+getIt.registerLazySingleton<PokemonLocalDataSource>(
+    () => PokemonLocalDataSourceImpl(client: getIt(), sharedPreferences: getIt()),
+  );
+
   getIt.registerLazySingleton<PokemonRepository>(
     () => PokemonRepositoryImpl(
       remoteDataSource: getIt(),
+      localDataSource: getIt(),
     ),
   );
   getIt.registerLazySingleton(
-    () => GetAllPokemons(getIt()),
+    () => GetAllPokemonsUsecase(getIt()),
   );
   getIt.registerFactory(
     () => PokemonBloc(getAllPokemons: getIt()),

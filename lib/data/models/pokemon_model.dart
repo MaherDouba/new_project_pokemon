@@ -1,6 +1,5 @@
 import 'package:hive/hive.dart';
 import '../../domain/entities/pokemon.dart';
-
 part 'pokemon_model.g.dart';
 
 @HiveType(typeId: 0)

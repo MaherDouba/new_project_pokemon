@@ -2,12 +2,11 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/pokemon.dart';
 import '../../domain/usecases/get_all_pokemons.dart';
-
 part 'pokemon_event.dart';
 part 'pokemon_state.dart';
 
 class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
-  final GetAllPokemons getAllPokemons;
+  final GetAllPokemonsUsecase getAllPokemons;
 
   PokemonBloc({required this.getAllPokemons}) : super(PokemonInitial()) {
     on<GetPokemonsEvent>(_onGetPokemonsEvent);

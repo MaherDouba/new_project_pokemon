@@ -16,7 +16,6 @@ class PokemonListScreen extends StatelessWidget {
           if (state is PokemonInitial) {
             return const Center(child: Text('Welcome'));
           } else if (state is PokemonLoading) {      //shimmer_post
-           // return const Center(child: CircularProgressIndicator());
           return ListView.builder(
               itemCount: 100,
               itemBuilder: (context, index) => ShimmerPostWidget(),
@@ -44,10 +43,10 @@ class PokemonListScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.network(pokemon.imageUrl, height: 100, width: 100),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         Text(
                           pokemon.name,
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -58,7 +57,7 @@ class PokemonListScreen extends StatelessWidget {
           } else if (state is PokemonError) {
             return Center(child: Text(state.message));
           } else {
-            return Center(child: Text('Unknown State'));
+            return const Center(child: Text('Unknown State'));
           }
         },
       ),
@@ -66,7 +65,7 @@ class PokemonListScreen extends StatelessWidget {
         onPressed: () {
           context.read<PokemonBloc>().add(GetPokemonsEvent());
         },
-        child: Icon(Icons.refresh),
+        child: const Icon(Icons.refresh),
       ),
     );
   }
