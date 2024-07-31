@@ -1,3 +1,4 @@
+
 import 'package:hive/hive.dart';
 import '../../domain/entities/pokemon.dart';
 part 'pokemon_model.g.dart';
@@ -66,13 +67,13 @@ class PokemonModel extends Pokemon {
       name: json['name'],
       imageUrl: imageUrl,
       url: url,
-      weight: json['weight'],
-      height: json['height'],
-      hp: json['stats'][0]['base_stat'],
-      atk: json['stats'][1]['base_stat'],
-      def: json['stats'][2]['base_stat'],
-      spd: json['stats'][5]['base_stat'],
-      exp: json['base_experience'],
+      weight: json['weight']?.toInt() ?? 199,
+      height: json['height']?.toInt() ??100 ,
+      hp: json['hp']?.toInt() ?? 15,
+      atk: json['atk']?.toInt()?? 90,
+      def: json['def']?.toInt() ?? 45,
+      spd: json['spd']?.toInt() ?? 13,
+      exp: json['exp']?.toInt() ?? 20,
     );
   }
 
