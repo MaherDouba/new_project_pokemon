@@ -1,5 +1,5 @@
-part of 'pokemon_bloc.dart';
-
+ part of 'pokemon_bloc.dart';
+ 
 abstract class PokemonEvent extends Equatable {
   const PokemonEvent();
 
@@ -8,4 +8,3 @@ abstract class PokemonEvent extends Equatable {
 }
 
 class GetPokemonsEvent extends PokemonEvent {}
-

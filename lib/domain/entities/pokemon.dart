@@ -25,7 +25,7 @@ class Pokemon extends Equatable {
     required this.exp,
   });
 
-  /*factory Pokemon.fromJson(Map<String, dynamic> json) {
+/* factory Pokemon.fromJson(Map<String, dynamic> json) {
     final urlParts = json['url'].split('/');
     final id = urlParts[urlParts.length - 2];
 

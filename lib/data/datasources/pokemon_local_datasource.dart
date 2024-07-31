@@ -8,24 +8,22 @@ abstract class PokemonLocalDataSource {
   Future<List<Pokemon>> getCachedPokemons();
   Future<void> cachePokemons(List<Pokemon> pokemons);
 }
- // ignore: constant_identifier_names
-  String CACHED_POKEMONS = 'CACHED_POKEMONS';
+
+const String CACHED_POKEMONS = 'CACHED_POKEMONS';
 
 class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
   final SharedPreferences sharedPreferences;
-  
-  
 
-  PokemonLocalDataSourceImpl({required this.sharedPreferences, required Object client});
+  PokemonLocalDataSourceImpl({required this.sharedPreferences});
 
   @override
-  Future<List<Pokemon>> getCachedPokemons() {
+  Future<List<Pokemon>> getCachedPokemons() async {
     final jsonString = sharedPreferences.getString(CACHED_POKEMONS);
     if (jsonString != null) {
       final List<dynamic> jsonList = json.decode(jsonString);
-      return Future.value(jsonList.map<PokemonModel>((json) => PokemonModel.fromJson(json)).toList());
+      return jsonList.map((json) => PokemonModel.fromJson(json)).toList();
     } else {
-        throw EmptyCacheException();
+      throw EmptyCacheException();
     }
   }
 

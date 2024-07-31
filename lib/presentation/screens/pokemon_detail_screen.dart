@@ -21,12 +21,9 @@ class PokemonDetailPage extends StatelessWidget {
               child: Image.network(pokemon.imageUrl, height: 200, width: 200),
             ),
             SizedBox(height: 16),
-
-            Center(child: Text('Weight: ${pokemon.weight}', style: TextStyle(fontSize: 18))),
-            Center(child: Text('Height: ${pokemon.height}', style: TextStyle(fontSize: 18))),
-
+            Text('Weight: ${pokemon.weight}', style: TextStyle(fontSize: 18)),
+            Text('Height: ${pokemon.height}', style: TextStyle(fontSize: 18)),
             SizedBox(height: 16),
-
             _buildStatRow('HP', pokemon.hp),
             _buildStatRow('ATK', pokemon.atk),
             _buildStatRow('DEF', pokemon.def),
@@ -43,7 +40,7 @@ class PokemonDetailPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          SizedBox(width: 75, child: Text('$label: ', style:const TextStyle(fontSize: 18))),
+          SizedBox(width: 75, child: Text('$label: ', style: TextStyle(fontSize: 18))),
           Expanded(
             child: LinearProgressIndicator(
               value: value / 100.0,
@@ -52,8 +49,8 @@ class PokemonDetailPage extends StatelessWidget {
               minHeight: 10,
             ),
           ),
-          const SizedBox(width: 10),
-          Text('$value', style: const TextStyle(fontSize: 18)),
+          SizedBox(width: 10),
+          Text('$value', style: TextStyle(fontSize: 18)),
         ],
       ),
     );

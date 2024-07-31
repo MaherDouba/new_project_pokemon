@@ -14,11 +14,12 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
 
   Future<void> _onGetPokemonsEvent(GetPokemonsEvent event, Emitter<PokemonState> emit) async {
     emit(PokemonLoading());
+
     final failureOrPokemonList = await getAllPokemons();
     failureOrPokemonList.fold(
       (failure) {
         print('Error occurred: ${failure.toString()}');
-        emit(PokemonError(message: failure.toString()));
+        emit(PokemonError(message: 'Failed to fetch pokemons: ${failure.toString()}'));
       },
       (pokemonList) {
         emit(PokemonLoaded(pokemons: pokemonList));

@@ -15,14 +15,14 @@ class PokemonListScreen extends StatelessWidget {
         builder: (context, state) {
           if (state is PokemonInitial) {
             return const Center(child: Text('Welcome'));
-          } else if (state is PokemonLoading) {      //shimmer_post
-          return ListView.builder(
-              itemCount: 100,
+          } else if (state is PokemonLoading) {
+            return ListView.builder(
+              itemCount: 10,
               itemBuilder: (context, index) => ShimmerPostWidget(),
             );
           } else if (state is PokemonLoaded) {
             return GridView.builder(
-              gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 3 / 4,
               ),
@@ -43,10 +43,10 @@ class PokemonListScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Image.network(pokemon.imageUrl, height: 100, width: 100),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
                         Text(
                           pokemon.name,
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -57,7 +57,7 @@ class PokemonListScreen extends StatelessWidget {
           } else if (state is PokemonError) {
             return Center(child: Text(state.message));
           } else {
-            return const Center(child: Text('Unknown State'));
+            return Center(child: Text('Unknown State'));
           }
         },
       ),
@@ -65,7 +65,7 @@ class PokemonListScreen extends StatelessWidget {
         onPressed: () {
           context.read<PokemonBloc>().add(GetPokemonsEvent());
         },
-        child: const Icon(Icons.refresh),
+        child: Icon(Icons.refresh),
       ),
     );
   }
