@@ -7,6 +7,8 @@ import '../../data/datasources/pokemon_remote_datasource.dart';
 import '../../data/repositories/pokemon_repository_impl.dart';
 import '../../domain/repositories/pokemon_repository.dart';
 import '../../domain/usecases/get_all_pokemons.dart';
+import '../../domain/usecases/get_scroll_position.dart';
+import '../../domain/usecases/save_scroll_position.dart';
 import '../../presentation/bloc/pokemon_bloc.dart';
 import '../network/network_info.dart';
 
@@ -40,9 +42,14 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<PokemonRepository>(() => PokemonRepositoryImpl(
       remoteDataSource: sl(), localDataSource: sl(), networkInfo: sl()));
 
-  getIt.registerLazySingleton<GetAllPokemonsUsecase>(
+ /* getIt.registerLazySingleton<GetAllPokemonsUsecase>(
     () => GetAllPokemonsUsecase(getIt()),
-  );
+  );*/
+
+   // Use Cases
+  sl.registerLazySingleton(() => SaveScrollPosition(sl()));
+  sl.registerLazySingleton(() => GetScrollPosition(sl()));
+  sl.registerLazySingleton(()=> GetAllPokemonsUsecase(sl()));
 
   getIt.registerFactory<PokemonBloc>(
     () => PokemonBloc(getAllPokemons: getIt()),

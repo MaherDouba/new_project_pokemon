@@ -52,4 +52,18 @@ class PokemonRepositoryImpl implements PokemonRepository {
    }
 
   }
+
+
+  @override
+  Future<void> saveScrollPosition(double position) async {
+    return await localDataSource.saveScrollPosition(position);
+  }
+
+  @override
+  Future<double?> getScrollPosition() async {
+    return await localDataSource.getScrollPosition();
+  }
+
+
+
 }

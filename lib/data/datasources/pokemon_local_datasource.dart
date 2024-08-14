@@ -7,9 +7,12 @@ import '../models/pokemon_model.dart';
 abstract class PokemonLocalDataSource {
   Future<List<PokemonModel>> getCachedPokemons();
   Future<void> cachePokemons(List<PokemonModel> pokemons);
+  Future<void> saveScrollPosition(double position);
+  Future<double?> getScrollPosition();
 }
 
 const CACHED_POKEMONS = 'CACHED_LIST_POKEMONS';
+const String SCROLL_POSITION_KEY = 'SCROLL_POSITION_KEY';
 
 class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
   final SharedPreferences sharedPreferences;
@@ -37,6 +40,17 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
     } else {
       throw EmptyCacheException();
     }
+  }
+
+
+  @override
+  Future<void> saveScrollPosition(double position) async {
+    await sharedPreferences.setDouble(SCROLL_POSITION_KEY, position);
+  }
+
+  @override
+  Future<double?> getScrollPosition() async {
+    return sharedPreferences.getDouble(SCROLL_POSITION_KEY);
   }
 
   

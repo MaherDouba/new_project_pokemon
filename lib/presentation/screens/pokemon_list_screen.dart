@@ -1,6 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/services/service_locator.dart';
+import '../../domain/usecases/get_scroll_position.dart';
+import '../../domain/usecases/save_scroll_position.dart';
 import '../bloc/pokemon_bloc.dart';
 import '../widgets/shimmer_post.dart';
 import 'pokemon_detail_screen.dart';
@@ -18,7 +21,15 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-
+    
+   // restore the scroll position
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final savedPosition = await sl<GetScrollPosition>().call();
+      if (savedPosition != null) {
+        _scrollController.jumpTo(savedPosition);
+      }
+    });
+     print("restored the scroll position");
      context.read<PokemonBloc>().add(GetPokemonsEvent());
 
   }
@@ -36,6 +47,8 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
 
   @override
   void dispose() {
+    // save scroll location
+    sl<SaveScrollPosition>().call(_scrollController.position.pixels);
     _scrollController.dispose();
     super.dispose();
   }

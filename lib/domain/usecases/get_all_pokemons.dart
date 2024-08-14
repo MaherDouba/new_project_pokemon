@@ -11,4 +11,6 @@ class GetAllPokemonsUsecase {
   Future<Either<Exception, List<Pokemon>>> call() async {
     return await repository.getAllPokemons();
   }
+
+  
 }
