@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:untitled/core/error/exceptions.dart';
 import 'package:untitled/data/models/pokemon_model.dart';
 
 
@@ -7,9 +8,11 @@ abstract class PokemonRemoteDataSource {
   Future<List<PokemonModel>> getAllPokemons();
 }
 
+const BASE_URL = 'https://pokeapi.co/api/v2/pokemon?limit=100';
+
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
   final http.Client client;
-
+  
   PokemonRemoteDataSourceImpl({required this.client});
 
   @override
@@ -17,7 +20,7 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
 
     try {
   final response = await client.get(
-    Uri.parse('https://pokeapi.co/api/v2/pokemon?limit=100'),
+    Uri.parse(BASE_URL),
     headers: {'Content-Type': 'application/json'},
   );
   
@@ -25,7 +28,7 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
     final List<dynamic> jsonList = json.decode(response.body)['results'];
     return jsonList.map((json) => PokemonModel.fromJson(json)).toList();
   } else {
-    throw Exception('Failed to load pokemons');
+    throw ServerException();
   }
 } catch (e) {
       throw Exception('Failed to fetch pokemons: $e');

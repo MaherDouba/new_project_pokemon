@@ -5,6 +5,7 @@ part 'pokemon_model.g.dart';
 
 @HiveType(typeId: 0)
 class PokemonModel extends Pokemon {
+
   @HiveField(0)
   final String name;
 
@@ -67,13 +68,13 @@ class PokemonModel extends Pokemon {
       name: json['name'],
       imageUrl: imageUrl,
       url: url,
-      weight: json['weight']?.toInt() ?? 199,
-      height: json['height']?.toInt() ??100 ,
-      hp: json['hp']?.toInt() ?? 15,
-      atk: json['atk']?.toInt()?? 90,
-      def: json['def']?.toInt() ?? 45,
-      spd: json['spd']?.toInt() ?? 13,
-      exp: json['exp']?.toInt() ?? 20,
+      weight: json['weight']?.toInt() ?? 0,
+      height: json['height']?.toInt() ??0 ,
+      hp: json['hp']?.toInt() ?? 0,
+      atk: json['atk']?.toInt()?? 0,
+      def: json['def']?.toInt() ?? 0,
+      spd: json['spd']?.toInt() ?? 0,
+      exp: json['exp']?.toInt() ?? 0,
     );
   }
 
