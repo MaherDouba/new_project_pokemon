@@ -56,7 +56,7 @@ Future<void> setupServiceLocator() async {
   );
 
   //!core
-    sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl())); 
+    sl.registerLazySingleton<NetworkInfo>(() => NetworkInfo()); 
 
   //! External
  sl.registerLazySingleton(() => InternetConnectionChecker());
