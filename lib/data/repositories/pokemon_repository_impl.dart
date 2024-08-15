@@ -24,23 +24,28 @@ class PokemonRepositoryImpl implements PokemonRepository {
   Future<Either<Exception, List<Pokemon>>> getAllPokemons() async {
     try {
       final localPokemons = await localDataSource.getCachedPokemons();
+
       if (localPokemons.isNotEmpty) {
         print("localPokemons is not empty and the data is from it.");
         _fetchAndCacheRemotePokemons();
         return Right(localPokemons);
       }
-      if (await networkInfo.isConnected) {
-        print('Network connection status: ${await networkInfo.isConnected}');
-        return await _fetchAndCacheRemotePokemons();
-      } else {
-        print("No network connection, unable to fetch from remote.");
-        return Left(OfflineException());
-      }
+    } on EmptyCacheException {
+      print("Cache is empty, fetching from remote.");
     } catch (e) {
-      print("Failed to fetch pokemons: $e");
+      print("Failed to fetch pokemons from cache: $e");
       return Left(ServerException());
     }
+
+    if (await networkInfo.isConnected) {
+      print('Network connection status: ${await networkInfo.isConnected}');
+      return await _fetchAndCacheRemotePokemons();
+    } else {
+      print("No network connection, unable to fetch from remote.");
+      return Left(OfflineException());
+    }
   }
+
   Future<Either<Exception, List<Pokemon>>> _fetchAndCacheRemotePokemons() async {
     try {
       print('........Trying to fetch from remote............');
@@ -69,10 +74,6 @@ class PokemonRepositoryImpl implements PokemonRepository {
 
 
 /*
-
-
-/*
-
  import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:http/http.dart' as http;
@@ -143,8 +144,8 @@ class PokemonRepositoryImpl implements PokemonRepository {
   Future<double?> getScrollPosition() async {
     return await localDataSource.getScrollPosition();
   }
-}
+}*/
 
- */
+ 
 
- */
+ 
