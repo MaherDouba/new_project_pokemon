@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/service_locator.dart';
 import '../../domain/usecases/get_scroll_position.dart';
 import '../../domain/usecases/save_scroll_position.dart';
 import '../bloc/pokemon_bloc.dart';
+import '../widgets/pokemon_error_widget.dart';
 import '../widgets/shimmer_post.dart';
 import 'pokemon_detail_screen.dart';
 
@@ -17,39 +19,47 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   final ScrollController _scrollController = ScrollController();
   bool isLoadingMore = false;
 
-  @override
+ @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
     
-   // restore the scroll position
+    _scrollController.addListener(_onScroll);
+
+    // Save scroll position on dispose
+    _scrollController.addListener(() {
+      sl<SaveScrollPosition>().call(_scrollController.position.pixels);
+    });
+    
+    // Restore the scroll position
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final savedPosition = await sl<GetScrollPosition>().call();
-      if (savedPosition != null) {
+      if (savedPosition != null  && savedPosition > 0.0) {
         _scrollController.jumpTo(savedPosition);
       }
     });
-     print("restored the scroll position");
-     context.read<PokemonBloc>().add(GetPokemonsEvent());
-
+    print("Restored the scroll position");
+    context.read<PokemonBloc>().add(GetPokemonsEvent());
   }
 
   void _onScroll() {
     if (_scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent &&
         !isLoadingMore) {
-      setState(() {
-        isLoadingMore = true;
-      });
-      context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
+      final state = context.read<PokemonBloc>().state;
+      if (state is PokemonLoaded && !state.hasReachedMax) {
+        setState(() {
+          isLoadingMore = true;
+        });
+        context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
+      }
     }
   }
 
   @override
   void dispose() {
-    // save scroll location
+    // Save scroll location
     sl<SaveScrollPosition>().call(_scrollController.position.pixels);
-    _scrollController.dispose();
+   _scrollController.dispose();
     super.dispose();
   }
 
@@ -61,13 +71,15 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
       ),
       body: BlocBuilder<PokemonBloc, PokemonState>(
         builder: (context, state) {
-           if (state is PokemonLoading) {
+          if (state is PokemonLoading) {
             return ListView.builder(
               controller: _scrollController,
-              itemCount: 10,
+              itemCount: 20,
               itemBuilder: (context, index) => ShimmerPostWidget(),
             );
           } else if (state is PokemonLoaded) {
+            // Reset isLoadingMore after the state changes
+            isLoadingMore = false;
             return LayoutBuilder(
               builder: (context, constraints) {
                 final screenWidth = constraints.maxWidth;
@@ -108,9 +120,9 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
                               CachedNetworkImage(
                                 imageUrl: pokemon.imageUrl,
                                 placeholder: (context, url) =>
-                                const  CircularProgressIndicator(),
+                                    const CircularProgressIndicator(),
                                 errorWidget: (context, url, error) =>
-                                const  Icon(Icons.error),
+                                    const Icon(Icons.error),
                                 fit: BoxFit.cover,
                                 height: screenWidth < 600 ? 120 : 150,
                                 width: screenWidth < 600 ? 120 : 150,
@@ -132,18 +144,18 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
               },
             );
           } else if (state is PokemonError) {
-            return Center(child: Text(state.message));
+            return PokemonErrorWidget(message: state.message);
           } else {
-            return Center(child: Text('Unknown State'));
+            return Center(child: Text('Something went wrong.'));
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
+    /*  floatingActionButton: FloatingActionButton(
         onPressed: () {
           context.read<PokemonBloc>().add(GetPokemonsEvent());
         },
         child: Icon(Icons.refresh),
-      ),
+      ), */
     );
   }
 }

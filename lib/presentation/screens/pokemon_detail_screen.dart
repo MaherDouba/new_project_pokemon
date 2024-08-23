@@ -118,7 +118,8 @@ class PokemonDetailPage extends StatelessWidget {
         children: [
           SizedBox(
               width: 50,
-              child: Text('$label:', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+              child: Text('$label:',  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold))),
+              
           const SizedBox(width: 10),
           Text('$value', style: TextStyle(fontSize: 18, color: _color)),
           const SizedBox(width: 10),

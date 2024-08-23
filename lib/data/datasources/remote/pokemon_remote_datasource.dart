@@ -5,22 +5,22 @@ import 'package:untitled/data/models/pokemon_model.dart';
 
 
 abstract class PokemonRemoteDataSource {
-  Future<List<PokemonModel>> getAllPokemons();
+  Future<List<PokemonModel>> getAllPokemons(int page);
 }
-
-const BASE_URL = 'https://pokeapi.co/api/v2/pokemon?limit=100';
 
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
   final http.Client client;
-  
+   static const int limit = 50;
+   static const BASE_URL = 'https://pokeapi.co/api/v2/pokemon';
   PokemonRemoteDataSourceImpl({required this.client});
 
   @override
-  Future<List<PokemonModel>> getAllPokemons() async {
-
+  Future<List<PokemonModel>> getAllPokemons(int page) async {
+   final int offset = (page - 1) * limit;
+    final url = '$BASE_URL?offset=$offset&limit=$limit';
     try {
   final response = await client.get(
-    Uri.parse(BASE_URL),
+    Uri.parse(url),
     headers: {'Content-Type': 'application/json'},
   );
   
@@ -31,6 +31,7 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
     throw ServerException();
   }
 } catch (e) {
+  
       throw Exception('Failed to fetch pokemons: $e');
     } 
 

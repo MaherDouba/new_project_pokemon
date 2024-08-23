@@ -2,8 +2,8 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../data/datasources/pokemon_local_datasource.dart';
-import '../../data/datasources/pokemon_remote_datasource.dart';
+import '../../data/datasources/local/pokemon_local_datasource.dart';
+import '../../data/datasources/remote/pokemon_remote_datasource.dart';
 import '../../data/repositories/pokemon_repository_impl.dart';
 import '../../domain/repositories/pokemon_repository.dart';
 import '../../domain/usecases/get_all_pokemons.dart';
@@ -29,22 +29,11 @@ Future<void> setupServiceLocator() async {
     () => PokemonLocalDataSourceImpl(sharedPreferences: getIt()),
   );
 
-/*  getIt.registerLazySingleton<PokemonRepository>(
-    () => PokemonRepositoryImpl(
-      remoteDataSource: getIt(),
-      localDataSource: getIt(),
-      networkInfo: getIt()
-    ),
-  );*/
 
   // _____________Repository________________
 
   sl.registerLazySingleton<PokemonRepository>(() => PokemonRepositoryImpl(
       remoteDataSource: sl(), localDataSource: sl(), networkInfo: sl()));
-
- /* getIt.registerLazySingleton<GetAllPokemonsUsecase>(
-    () => GetAllPokemonsUsecase(getIt()),
-  );*/
 
    // Use Cases
   sl.registerLazySingleton(() => SaveScrollPosition(sl()));
