@@ -38,7 +38,7 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
       final failureOrPokemonList = await getAllPokemons(page:page);   
       failureOrPokemonList.fold(
         (failure) {
-          emit(PokemonError(message: 'No internet connection. Please check your network settings and try again later: ${failure.toString()}'));
+          emit(PokemonError(message: 'No internet connection. Please check your network settings and try again later'));
         },
         (pokemonList) {
           if (pokemonList.isEmpty) {

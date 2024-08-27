@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-
 import '../entities/pokemon.dart';
 
 abstract class PokemonRepository {

@@ -11,12 +11,14 @@ abstract class PokemonRemoteDataSource {
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
   final http.Client client;
    static const int limit = 50;
+   late int offset;
    static const BASE_URL = 'https://pokeapi.co/api/v2/pokemon';
   PokemonRemoteDataSourceImpl({required this.client});
 
   @override
   Future<List<PokemonModel>> getAllPokemons(int page) async {
-   final int offset = (page - 1) * limit;
+    
+    offset = (page - 1) * limit;
     final url = '$BASE_URL?offset=$offset&limit=$limit';
     try {
   final response = await client.get(

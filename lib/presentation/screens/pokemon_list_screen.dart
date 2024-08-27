@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/services/service_locator.dart';
 import '../../domain/usecases/get_scroll_position.dart';
 import '../../domain/usecases/save_scroll_position.dart';
@@ -19,25 +18,26 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   final ScrollController _scrollController = ScrollController();
   bool isLoadingMore = false;
 
- @override
+  @override
   void initState() {
     super.initState();
-    
+
     _scrollController.addListener(_onScroll);
 
     // Save scroll position on dispose
     _scrollController.addListener(() {
       sl<SaveScrollPosition>().call(_scrollController.position.pixels);
     });
-    
+
     // Restore the scroll position
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final savedPosition = await sl<GetScrollPosition>().call();
-      if (savedPosition != null  && savedPosition > 0.0) {
+      if (savedPosition != null && savedPosition > 0.0) {
         _scrollController.jumpTo(savedPosition);
       }
     });
-    print("Restored the scroll position");
+
+    
     context.read<PokemonBloc>().add(GetPokemonsEvent());
   }
 
@@ -59,7 +59,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   void dispose() {
     // Save scroll location
     sl<SaveScrollPosition>().call(_scrollController.position.pixels);
-   _scrollController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -96,48 +96,59 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
                       crossAxisCount: crossAxisCount,
                       childAspectRatio: childAspectRatio,
                     ),
-                    itemCount: state.pokemons.length,
+                    itemCount: state.hasReachedMax
+                        ? state.pokemons.length
+                        : state.pokemons.length + 1,
                     itemBuilder: (context, index) {
-                      final pokemon = state.pokemons[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  PokemonDetailPage(pokemon: pokemon),
+                      if (index < state.pokemons.length) {
+                        final pokemon = state.pokemons[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    PokemonDetailPage(pokemon: pokemon),
+                              ),
+                            );
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
                             ),
-                          );
-                        },
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                            elevation: 5,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                CachedNetworkImage(
+                                  imageUrl: pokemon.imageUrl,
+                                  placeholder: (context, url) =>
+                                      const CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.error),
+                                  fit: BoxFit.cover,
+                                  height: screenWidth < 600 ? 120 : 150,
+                                  width: screenWidth < 600 ? 120 : 150,
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  pokemon.name,
+                                  style: TextStyle(
+                                      fontSize: screenWidth < 600 ? 14 : 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
                           ),
-                          elevation: 5,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              CachedNetworkImage(
-                                imageUrl: pokemon.imageUrl,
-                                placeholder: (context, url) =>
-                                    const CircularProgressIndicator(),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error),
-                                fit: BoxFit.cover,
-                                height: screenWidth < 600 ? 120 : 150,
-                                width: screenWidth < 600 ? 120 : 150,
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                pokemon.name,
-                                style: TextStyle(
-                                    fontSize: screenWidth < 600 ? 14 : 18,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                        );
+                      } else {
+                        return const Center(            
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: CircularProgressIndicator(),
                           ),
-                        ),
-                      );
+                        );
+                      }
                     },
                   ),
                 );
@@ -150,12 +161,6 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
           }
         },
       ),
-    /*  floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          context.read<PokemonBloc>().add(GetPokemonsEvent());
-        },
-        child: Icon(Icons.refresh),
-      ), */
     );
   }
 }
