@@ -69,11 +69,11 @@ class PokemonModel extends Pokemon {
       imageUrl: imageUrl,
       url: url,
       weight: json['weight']?.toInt() ?? 170,
-      height: json['height']?.toInt() ??190 ,
+      height: json['height']?.toInt() ??193 ,
       hp: json['hp']?.toInt() ?? 19,
-      atk: json['atk']?.toInt()?? 40,
+      atk: json['atk']?.toInt()?? 42,
       def: json['def']?.toInt() ?? 65,
-      spd: json['spd']?.toInt() ?? 98,
+      spd: json['spd']?.toInt() ?? 93,
       exp: json['exp']?.toInt() ?? 18,
     );
   }

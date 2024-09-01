@@ -21,9 +21,7 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
 
   @override
   Future<void> cachePokemons(List<PokemonModel> pokemonModel) async {
-    final existingPokemons = await getCachedPokemons().catchError((_) => <PokemonModel>[]);
-    List<PokemonModel> allPokemons = List.from(existingPokemons)..addAll(pokemonModel);
-    List PokemonModelToList = allPokemons.map<Map<String, dynamic>>((pokemonModel) => pokemonModel.toJson()).toList();
+     List PokemonModelToList = pokemonModel.map<Map<String, dynamic>>((pokemonModel) => pokemonModel.toJson()).toList();
     sharedPreferences.setString(CACHED_POKEMONS, json.encode(PokemonModelToList));
     print("from cach pokemon / pokemon_local_datasource");
     return Future.value(unit);
@@ -52,3 +50,18 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
     return sharedPreferences.getDouble(SCROLL_POSITION_KEY);
   }
 }
+
+/** 
+  @override
+  Future<void> cachePokemons(List<PokemonModel> pokemonModel) async {
+    List PokemonModelToList = pokemonModel.map<Map<String, dynamic>>((pokemonModel) => pokemonModel.toJson()).toList();
+    sharedPreferences.setString(CACHED_POKEMONS, json.encode(PokemonModelToList));
+    print("from cach pokemon / pokemon_local_datasource");
+    return Future.value(unit);
+  }
+
+     final existingPokemons = await getCachedPokemons().catchError((_) => <PokemonModel>[]);
+    List<PokemonModel> allPokemons = List.from(existingPokemons)..addAll(pokemonModel);
+    List PokemonModelToList = allPokemons.map<Map<String, dynamic>>((pokemonModel) => pokemonModel.toJson()).toList();
+    sharedPreferences.setString(CACHED_POKEMONS, json.encode(PokemonModelToList));
+   */

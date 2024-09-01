@@ -41,7 +41,7 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(()=> GetAllPokemonsUsecase(sl()));
 
   getIt.registerFactory<PokemonBloc>(
-    () => PokemonBloc(getAllPokemons: getIt()),
+    () => PokemonBloc(getAllPokemons: getIt(), getScrollPosition: getIt()),
   );
 
   //!core

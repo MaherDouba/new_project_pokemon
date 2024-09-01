@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../core/services/service_locator.dart';
-import '../../domain/usecases/get_scroll_position.dart';
 import '../../domain/usecases/save_scroll_position.dart';
 import '../bloc/pokemon_bloc.dart';
 import '../widgets/pokemon_error_widget.dart';
@@ -18,27 +17,25 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   final ScrollController _scrollController = ScrollController();
   bool isLoadingMore = false;
 
-  @override
+    @override
   void initState() {
     super.initState();
-
+   context.read<PokemonBloc>().add(GetPokemonsEvent());
     _scrollController.addListener(_onScroll);
-
-    // Save scroll position on dispose
-    _scrollController.addListener(() {
-      sl<SaveScrollPosition>().call(_scrollController.position.pixels);
-    });
-
+    
     // Restore the scroll position
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final savedPosition = await sl<GetScrollPosition>().call();
-      if (savedPosition != null && savedPosition > 0.0) {
-        _scrollController.jumpTo(savedPosition);
+      final state = context.read<PokemonBloc>().state;
+      if (state is PokemonLoaded && state.scrollPosition > 0.0) {
+        _scrollController.jumpTo(state.scrollPosition );
       }
     });
-
     
-    context.read<PokemonBloc>().add(GetPokemonsEvent());
+    // Save scroll position on dispose
+   _scrollController.addListener(() {
+      sl<SaveScrollPosition>().call(_scrollController.position.pixels);
+    });
+    
   }
 
   void _onScroll() {
@@ -50,15 +47,15 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
         setState(() {
           isLoadingMore = true;
         });
-        context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
+       context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
       }
     }
   }
 
   @override
   void dispose() {
-    // Save scroll location
-    sl<SaveScrollPosition>().call(_scrollController.position.pixels);
+     // Save scroll position on dispose
+      sl<SaveScrollPosition>().call(_scrollController.position.pixels);
     _scrollController.dispose();
     super.dispose();
   }
@@ -73,20 +70,18 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
         builder: (context, state) {
           if (state is PokemonLoading) {
             return ListView.builder(
-              controller: _scrollController,
+           //   controller: _scrollController,
               itemCount: 20,
               itemBuilder: (context, index) => ShimmerPostWidget(),
             );
           } else if (state is PokemonLoaded) {
-            // Reset isLoadingMore after the state changes
             isLoadingMore = false;
             return LayoutBuilder(
               builder: (context, constraints) {
                 final screenWidth = constraints.maxWidth;
                 final crossAxisCount = screenWidth < 600 ? 2 : 4;
                 final childAspectRatio = screenWidth < 600 ? 3 / 4 : 2 / 3;
-
-                return Scrollbar(
+                  return Scrollbar(
                   controller: _scrollController,
                   thumbVisibility: true,
                   trackVisibility: true,
