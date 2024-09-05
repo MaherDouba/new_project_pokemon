@@ -19,42 +19,48 @@ class PokemonRepositoryImpl implements PokemonRepository {
 
   @override
   Future<Either<Exception, List<Pokemon>>> getAllPokemons(int page) async {
-  try {
-    final localPokemons = await localDataSource.getCachedPokemons();
-  
-    if (localPokemons.isNotEmpty && page== 1) {
-    //  await localDataSource.getScrollPosition();
-      print("localPokemons is not empty and the data is from it."); 
-      return Right(localPokemons);
-    }
-  } on EmptyCacheException {
-    print("Cache is empty, fetching from remote.");
-  } catch (e) {
-    print("Failed to fetch pokemons from cache: $e");
-    return Left(ServerException());
-  }
-
- if ( await networkInfo.isConnected ) {
-      print('Network connection status: ${await networkInfo.isConnected}');
-      
-      return await _fetchAndCacheRemotePokemons(page);
+    if (await networkInfo.isConnected) {
+      try {
+        return await _fetchAndCacheRemotePokemons(page);
+      } catch (e) {
+        return await _getLocalPokemonsCircular(page);
+      }
     } else {
-      print("No network connection, unable to fetch from remote.");
-      return Left(OfflineException());
+      return await _getLocalPokemonsCircular(page);
     }
   }
 
- Future<Either<Exception, List<Pokemon>>> _fetchAndCacheRemotePokemons(int page) async {
+  Future<Either<Exception, List<Pokemon>>> _getLocalPokemonsCircular(int page) async {
     try {
-      print('........Trying to fetch from remote............');
-      final remotePokemons = await remoteDataSource.getAllPokemons(page+1);
-      print('Fetched ${remotePokemons.length} pokemons from remote');
-      await localDataSource.cachePokemons(remotePokemons);
+      List<int> cachedPages = await localDataSource.getCachedPages();
+      if (cachedPages.isEmpty) {
+        return Left(EmptyCacheException());
+      }
+
+      int pageToFetch = cachedPages.contains(page) ? page : cachedPages.first;
+      final localPokemons = await localDataSource.getCachedPokemons(pageToFetch);
       
-      print('Cached ${remotePokemons.length} pokemons');
+      if (localPokemons.isEmpty) {
+        pageToFetch = await localDataSource.getNextCachedPage(pageToFetch);
+        final nextPagePokemons = await localDataSource.getCachedPokemons(pageToFetch);
+        await saveCurrentPage(pageToFetch);
+        return Right(nextPagePokemons);
+      }
+
+      await saveCurrentPage(pageToFetch);
+      return Right(localPokemons);
+    } catch (e) {
+      return Left(EmptyCacheException());
+    }
+  }
+
+  Future<Either<Exception, List<Pokemon>>> _fetchAndCacheRemotePokemons(int page) async {
+    try {
+      final remotePokemons = await remoteDataSource.getAllPokemons(page);    
+      double? currentScrollPosition = await getScrollPosition();
+      await localDataSource.cachePokemons(remotePokemons, page, currentScrollPosition ?? 0.0);     
       return Right(remotePokemons);
     } catch (e) {
-      print("Failed to fetch from remote source: $e");
       return Left(ServerException());
     }
   }
@@ -69,33 +75,14 @@ class PokemonRepositoryImpl implements PokemonRepository {
   Future<double?> getScrollPosition() async {
     return await localDataSource.getScrollPosition();
   }
-}
 
- 
-/**
- * 
- *   @override
-  Future<Either<Exception, List<Pokemon>>> getAllPokemons(int page, {bool forceRemote = false}) async {
-    if (!forceRemote) {
-      try {
-        final localPokemons = await localDataSource.getCachedPokemons();
-        if (localPokemons.isNotEmpty) {
-          print("عرض البيانات المحفوظة محليًا");
-          return Right(localPokemons);
-        }
-      } catch (e) {
-        print("فشل في جلب البيانات من التخزين المحلي: $e");
-      }
-    }
-
-    if (await networkInfo.isConnected) {
-      return await _fetchAndCacheRemotePokemons(page);
-    } else {
-      print("لا يوجد اتصال بالإنترنت");
-      return Left(OfflineException());
-    }
+  @override
+  Future<void> saveCurrentPage(int page) async {
+    return await localDataSource.saveCurrentPage(page);
   }
- * 
- * 
- */
- 
+
+  @override
+  Future<int> getCurrentPage() async {
+    return await localDataSource.getCurrentPage();
+  }  
+}

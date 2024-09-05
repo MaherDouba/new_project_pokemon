@@ -16,6 +16,7 @@ class PokemonListScreen extends StatefulWidget {
 class _PokemonListScreenState extends State<PokemonListScreen> {
   final ScrollController _scrollController = ScrollController();
   bool isLoadingMore = false;
+  bool isLoadingPrevious = false;
 
     @override
   void initState() {
@@ -39,17 +40,22 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels ==
-            _scrollController.position.maxScrollExtent &&
-        !isLoadingMore) {
-      final state = context.read<PokemonBloc>().state;
-      if (state is PokemonLoaded && !state.hasReachedMax) {
-        setState(() {
-          isLoadingMore = true;
-        });
-       context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
-      }
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    
+    if (currentScroll == maxScroll && !isLoadingMore) {
+      setState(() {
+        isLoadingMore = true;
+      });
+      context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
+    } else if (currentScroll == 0 && !isLoadingPrevious) {
+      setState(() {
+        isLoadingPrevious = true;
+      });
+      context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
     }
+    
+   // context.read<PokemonBloc>().add(SaveScrollPositionEvent(currentScroll));
   }
 
   @override
@@ -75,6 +81,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
               itemBuilder: (context, index) => ShimmerPostWidget(),
             );
           } else if (state is PokemonLoaded) {
+            isLoadingPrevious = false;
             isLoadingMore = false;
             return LayoutBuilder(
               builder: (context, constraints) {

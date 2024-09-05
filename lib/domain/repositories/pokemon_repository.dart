@@ -5,4 +5,6 @@ abstract class PokemonRepository {
    Future<Either<Exception, List<Pokemon>>>  getAllPokemons(int page);
    Future<void> saveScrollPosition(double position);
    Future<double?> getScrollPosition();
+   Future<void> saveCurrentPage(int page);
+   Future<int> getCurrentPage();
 }

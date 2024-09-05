@@ -40,7 +40,8 @@ class PokemonErrorWidget extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                   context.read<PokemonBloc>().add(GetPokemonsEvent());
+             
+                 context.read<PokemonBloc>().add(GetPokemonsEvent());
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
                 child:const Text('Retry', style: TextStyle(color: Colors.redAccent)),

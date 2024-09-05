@@ -11,3 +11,4 @@ class GetPokemonsEvent extends PokemonEvent {}
 
 class LoadMorePokemonsEvent extends PokemonEvent {}
 
+class LoadPreviousPokemonsEvent extends PokemonEvent {}

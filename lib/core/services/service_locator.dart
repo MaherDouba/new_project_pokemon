@@ -2,6 +2,8 @@ import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled/domain/usecases/get_current_page.dart';
+import 'package:untitled/domain/usecases/save_current_page.dart';
 import '../../data/datasources/local/pokemon_local_datasource.dart';
 import '../../data/datasources/remote/pokemon_remote_datasource.dart';
 import '../../data/repositories/pokemon_repository_impl.dart';
@@ -39,9 +41,11 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => SaveScrollPosition(sl()));
   sl.registerLazySingleton(() => GetScrollPosition(sl()));
   sl.registerLazySingleton(()=> GetAllPokemonsUsecase(sl()));
+  sl.registerLazySingleton(()=> SaveCurrentPage(sl()));
+  sl.registerLazySingleton(()=> GetCurrentPage(sl()));
 
   getIt.registerFactory<PokemonBloc>(
-    () => PokemonBloc(getAllPokemons: getIt(), getScrollPosition: getIt()),
+    () => PokemonBloc(getAllPokemons: getIt(), getScrollPosition: getIt(), saveCurrentPage: getIt(), getCurrentPage: getIt()),
   );
 
   //!core
