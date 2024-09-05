@@ -17,18 +17,22 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   final ScrollController _scrollController = ScrollController();
   bool isLoadingMore = false;
   bool isLoadingPrevious = false;
+  
 
     @override
   void initState() {
     super.initState();
-   context.read<PokemonBloc>().add(GetPokemonsEvent());
-    _scrollController.addListener(_onScroll);
+    context.read<PokemonBloc>().add(GetPokemonsEvent());
+     _scrollController.addListener(_onScroll);
+    
+   
     
     // Restore the scroll position
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final state = context.read<PokemonBloc>().state;
       if (state is PokemonLoaded && state.scrollPosition > 0.0) {
         _scrollController.jumpTo(state.scrollPosition );
+        
       }
     });
     
@@ -55,7 +59,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
       context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
     }
     
-   // context.read<PokemonBloc>().add(SaveScrollPositionEvent(currentScroll));
+   
   }
 
   @override
@@ -80,7 +84,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
               itemCount: 20,
               itemBuilder: (context, index) => ShimmerPostWidget(),
             );
-          } else if (state is PokemonLoaded) {
+          } else if (state is PokemonLoaded ) {
             isLoadingPrevious = false;
             isLoadingMore = false;
             return LayoutBuilder(

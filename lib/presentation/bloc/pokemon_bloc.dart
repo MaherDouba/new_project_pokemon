@@ -100,6 +100,6 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
       );
     }
   }
-  
-}
 
+  }
+  

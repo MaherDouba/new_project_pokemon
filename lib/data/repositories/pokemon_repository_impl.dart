@@ -17,18 +17,27 @@ class PokemonRepositoryImpl implements PokemonRepository {
     required this.networkInfo,
   });
 
-  @override
-  Future<Either<Exception, List<Pokemon>>> getAllPokemons(int page) async {
-    if (await networkInfo.isConnected) {
-      try {
-        return await _fetchAndCacheRemotePokemons(page);
-      } catch (e) {
-        return await _getLocalPokemonsCircular(page);
-      }
-    } else {
+@override
+Future<Either<Exception, List<Pokemon>>> getAllPokemons(int page) async {
+  try {
+    final localPokemons = await localDataSource.getCachedPokemons(page);
+    if (localPokemons.isNotEmpty) {
+      return Right(localPokemons);
+    }
+  } catch (e) {
+    
+  }
+
+  if (await networkInfo.isConnected) {
+    try {
+      return await _fetchAndCacheRemotePokemons(page);
+    } catch (e) {
       return await _getLocalPokemonsCircular(page);
     }
+  } else {
+    return await _getLocalPokemonsCircular(page);
   }
+}
 
   Future<Either<Exception, List<Pokemon>>> _getLocalPokemonsCircular(int page) async {
     try {
