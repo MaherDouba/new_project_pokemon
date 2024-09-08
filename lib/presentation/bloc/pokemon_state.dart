@@ -13,33 +13,33 @@ class PokemonLoading extends PokemonState {}
 
 class PokemonLoaded extends PokemonState {
   final List<Pokemon> pokemons;
-  final double scrollPosition;
+  final double scrollPercentage;
   final bool hasReachedMax;
   final int currentPage;
 
-  const PokemonLoaded({
+  const PokemonLoaded(  {
     required this.pokemons,
-    required this.scrollPosition,
+    required this.scrollPercentage,
     this.hasReachedMax = false,
     required this.currentPage,
   });
 
   PokemonLoaded copyWith({
     List<Pokemon>? pokemons,
-    double? scrollPosition,
+    double? scrollPercentage,
     bool? hasReachedMax,
-    int? currentPage
+    int? currentPage,
   }) {
     return PokemonLoaded(
       pokemons: pokemons ?? this.pokemons,
-      scrollPosition: scrollPosition ?? this.scrollPosition,
+      scrollPercentage: scrollPercentage ?? this.scrollPercentage,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       currentPage: currentPage ?? this.currentPage,
     );
   }
 
   @override
-  List<Object> get props => [pokemons, scrollPosition, hasReachedMax , currentPage ];
+  List<Object> get props => [pokemons, scrollPercentage, hasReachedMax, currentPage ];
 }
 
 class PokemonError extends PokemonState {

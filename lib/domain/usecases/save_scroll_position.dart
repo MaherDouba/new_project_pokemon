@@ -1,11 +1,11 @@
 import '../repositories/pokemon_repository.dart';
 
-class SaveScrollPosition {
+class SaveScrollPercentage {
   final PokemonRepository repository;
 
-  SaveScrollPosition(this.repository);
+  SaveScrollPercentage(this.repository);
 
-  Future<void> call(double position) async {
-    return await repository.saveScrollPosition(position);
+  Future<void> call(double percentage) async {
+    return await repository.saveScrollPercentage(percentage);
   }
 }

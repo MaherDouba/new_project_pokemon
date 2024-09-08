@@ -18,29 +18,53 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   bool isLoadingMore = false;
   bool isLoadingPrevious = false;
   
-
-    @override
+  @override
   void initState() {
     super.initState();
     context.read<PokemonBloc>().add(GetPokemonsEvent());
-     _scrollController.addListener(_onScroll);
-    
-   
-    
+  _scrollController.addListener(_onScroll);
     // Restore the scroll position
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final state = context.read<PokemonBloc>().state;
-      if (state is PokemonLoaded && state.scrollPosition > 0.0) {
-        _scrollController.jumpTo(state.scrollPosition );
-        
+      if (state is PokemonLoaded && state.scrollPercentage > 0.0) {
+        await _restoreScrollPosition(state.scrollPercentage);
       }
     });
     
-    // Save scroll position on dispose
-   _scrollController.addListener(() {
-      sl<SaveScrollPosition>().call(_scrollController.position.pixels);
+    // Save scroll percentage on scroll
+     _scrollController.addListener(() {
+      if (_scrollController.hasClients) {
+         final state = context.read<PokemonBloc>().state;
+         if (state is PokemonLoaded ) {
+          
+            double max = _scrollController.position.maxScrollExtent * (state.currentPage);
+            print("maxScrollExtent =${_scrollController.position.maxScrollExtent} ");
+            double scrollPercentage = _scrollController.offset / max ;
+            print("current page  = ${state.currentPage}");
+            print("offset =${_scrollController.offset} ");
+            print("maxScroll =${max} ");
+            print(" offset /maxScroll =${scrollPercentage} ");
+
+        sl<SaveScrollPercentage>().call(scrollPercentage);
+         }
+      /*  double scrollPercentage = _scrollController.offset / _scrollController.position.maxScrollExtent;
+        print(" _scrollController.offset =${_scrollController.offset} ");
+        print(" _scrollController.position.maxScrollExtent =${_scrollController.position.maxScrollExtent} ");
+        print(" offset /maxScrollExtent =${scrollPercentage} ");
+        sl<SaveScrollPercentage>().call(scrollPercentage);*/
+      }
     });
-    
+  }
+
+  Future<void> _restoreScrollPosition(double scrollPercentage) async {
+    await Future.delayed(Duration(milliseconds: 100)); 
+    if (_scrollController.hasClients) {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final scrollTo = maxScroll * scrollPercentage;
+      print("scrollPercentage....$scrollPercentage");
+      print("scrollTo .... $scrollTo");
+      _scrollController.jumpTo(scrollTo);
+    }
   }
 
   void _onScroll() {
@@ -58,14 +82,15 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
       });
       context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
     }
-    
-   
   }
 
   @override
   void dispose() {
-     // Save scroll position on dispose
-      sl<SaveScrollPosition>().call(_scrollController.position.pixels);
+    // Save scroll percentage on dispose
+    if (_scrollController.hasClients) {
+      double scrollPercentage = _scrollController.offset / _scrollController.position.maxScrollExtent;
+      sl<SaveScrollPercentage>().call(scrollPercentage);
+    }
     _scrollController.dispose();
     super.dispose();
   }
@@ -170,3 +195,90 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
     );
   }
 }
+
+
+
+
+
+
+/*
+
+
+   // final itemHeight = _scrollController.position.maxScrollExtent / state.pokemons.length;
+  // max = max - itemHeight;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<PokemonBloc>().add(GetPokemonsEvent());
+    _scrollController.addListener(_onScroll);
+    
+    // Restore the scroll position
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final state = context.read<PokemonBloc>().state;
+      if (state is PokemonLoaded && state.scrollPosition > 0.0) {
+        await _restoreScrollPosition(state.scrollPosition);
+      }
+    });
+    
+    // Save scroll percentage on scroll
+    _scrollController.addListener(() {
+      if (_scrollController.hasClients) {
+        double scrollPercentage = _scrollController.offset / _scrollController.position.maxScrollExtent;
+        sl<SaveScrollPosition>().call(scrollPercentage);
+      }
+    });
+  }
+
+Future<void> _restoreScrollPosition(double scrollPercentage) async {
+  await Future.delayed(Duration(milliseconds: 100));
+  if (_scrollController.hasClients) {
+    final state = context.read<PokemonBloc>().state;
+    if (state is PokemonLoaded) {
+      final cachedCount = (state.currentPage-1 )*50 ;
+      print("state.currentPage = ${state.currentPage}");
+       print("cachedCount = $cachedCount");
+      final itemHeight = 150.0;
+      final totalItemsHeight = cachedCount * itemHeight;
+      final visibleItemsHeight = _scrollController.position.viewportDimension;
+      print("visibleItemsHeight = $visibleItemsHeight");
+      final scrollableHeight = totalItemsHeight - visibleItemsHeight;
+      
+      if (scrollableHeight > 0) {
+        final scrollTo = scrollableHeight * scrollPercentage;
+        _scrollController.jumpTo(scrollTo);
+      }
+    }
+  }
+}
+
+  void _onScroll() {
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.position.pixels;
+    
+    if (currentScroll == maxScroll && !isLoadingMore) {
+      setState(() {
+        isLoadingMore = true;
+      });
+      context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
+    } else if (currentScroll == 0 && !isLoadingPrevious) {
+      setState(() {
+        isLoadingPrevious = true;
+      });
+      context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
+    }
+  }
+
+  @override
+  void dispose() {
+    // Save scroll percentage on dispose
+    if (_scrollController.hasClients) {
+      double scrollPercentage = _scrollController.offset / _scrollController.position.maxScrollExtent;
+      sl<SaveScrollPosition>().call(scrollPercentage);
+    }
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+
+ */

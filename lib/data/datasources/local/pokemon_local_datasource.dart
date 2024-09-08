@@ -5,9 +5,9 @@ import '../../models/pokemon_model.dart';
 
 abstract class PokemonLocalDataSource {
   Future<List<PokemonModel>> getCachedPokemons(int page);
-  Future<void> cachePokemons(List<PokemonModel> pokemons, int page, double scrollPosition);
-  Future<void> saveScrollPosition(double position);
-  Future<double?> getScrollPosition();
+  Future<void> cachePokemons(List<PokemonModel> pokemons, int page, double scrollPercentage);
+  Future<void> saveScrollPercentage(double percentage);
+  Future<double?> getScrollPercentage();
   Future<void> saveCurrentPage(int page);
   Future<int> getCurrentPage();
   Future<List<int>> getCachedPages();
@@ -15,7 +15,7 @@ abstract class PokemonLocalDataSource {
 }
 
 const CACHED_POKEMONS = 'CACHED_POKEMONS_PAGE_';
-const String SCROLL_POSITION_KEY = 'SCROLL_POSITION_KEY_';
+const String SCROLL_PERCENTAGE_KEY = 'SCROLL_PERCENTAGE_KEY_';
 const String CURRENT_PAGE_KEY = 'CURRENT_PAGE_KEY';
 const String CACHED_PAGES_KEY = 'CACHED_PAGES_KEY';
 
@@ -25,12 +25,11 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
   PokemonLocalDataSourceImpl({required this.sharedPreferences});
 
   @override
-  Future<void> cachePokemons(List<PokemonModel> pokemonModel, int page, double scrollPosition) async {
-    await saveScrollPosition(scrollPosition);
+  Future<void> cachePokemons(List<PokemonModel> pokemonModel, int page, double scrollPercentage) async {
+    await saveScrollPercentage(scrollPercentage);
     List pokemonModelToList = pokemonModel.map<Map<String, dynamic>>((pokemonModel) => pokemonModel.toJson()).toList();
     await sharedPreferences.setString('$CACHED_POKEMONS$page', json.encode(pokemonModelToList));
     
-  
     List<int> cachedPages = await getCachedPages();
     if (!cachedPages.contains(page)) {
       cachedPages.add(page);
@@ -54,15 +53,15 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
   }
 
   @override
-  Future<void> saveScrollPosition(double position) async {
+  Future<void> saveScrollPercentage(double percentage) async {
     int currentPage = await getCurrentPage();
-    await sharedPreferences.setDouble('$SCROLL_POSITION_KEY$currentPage', position);
+    await sharedPreferences.setDouble('$SCROLL_PERCENTAGE_KEY$currentPage', percentage);
   }
 
   @override
-  Future<double?> getScrollPosition() async {
+  Future<double?> getScrollPercentage() async {
     int currentPage = await getCurrentPage();
-    return sharedPreferences.getDouble('$SCROLL_POSITION_KEY$currentPage');
+    return sharedPreferences.getDouble('$SCROLL_PERCENTAGE_KEY$currentPage');
   }
 
   @override
@@ -84,7 +83,8 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
     }
     return [];
   }
-    @override
+
+  @override
   Future<int> getNextCachedPage(int currentPage) async {
     List<int> cachedPages = await getCachedPages();
     if (cachedPages.isEmpty) {

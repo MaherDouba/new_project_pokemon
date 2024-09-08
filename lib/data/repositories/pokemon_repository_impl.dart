@@ -17,27 +17,27 @@ class PokemonRepositoryImpl implements PokemonRepository {
     required this.networkInfo,
   });
 
-@override
-Future<Either<Exception, List<Pokemon>>> getAllPokemons(int page) async {
-  try {
-    final localPokemons = await localDataSource.getCachedPokemons(page);
-    if (localPokemons.isNotEmpty) {
-      return Right(localPokemons);
-    }
-  } catch (e) {
-    
-  }
-
-  if (await networkInfo.isConnected) {
+  @override
+  Future<Either<Exception, List<Pokemon>>> getAllPokemons(int page) async {
     try {
-      return await _fetchAndCacheRemotePokemons(page);
+      final localPokemons = await localDataSource.getCachedPokemons(page);
+      if (localPokemons.isNotEmpty) {
+        return Right(localPokemons);
+      }
     } catch (e) {
+      // Ignore cache exceptions
+    }
+
+    if (await networkInfo.isConnected) {
+      try {
+        return await _fetchAndCacheRemotePokemons(page);
+      } catch (e) {
+        return await _getLocalPokemonsCircular(page);
+      }
+    } else {
       return await _getLocalPokemonsCircular(page);
     }
-  } else {
-    return await _getLocalPokemonsCircular(page);
   }
-}
 
   Future<Either<Exception, List<Pokemon>>> _getLocalPokemonsCircular(int page) async {
     try {
@@ -66,8 +66,8 @@ Future<Either<Exception, List<Pokemon>>> getAllPokemons(int page) async {
   Future<Either<Exception, List<Pokemon>>> _fetchAndCacheRemotePokemons(int page) async {
     try {
       final remotePokemons = await remoteDataSource.getAllPokemons(page);    
-      double? currentScrollPosition = await getScrollPosition();
-      await localDataSource.cachePokemons(remotePokemons, page, currentScrollPosition ?? 0.0);     
+      double? currentScrollPercentage = await getScrollPercentage();
+      await localDataSource.cachePokemons(remotePokemons, page, currentScrollPercentage ?? 0.0);     
       return Right(remotePokemons);
     } catch (e) {
       return Left(ServerException());
@@ -75,14 +75,14 @@ Future<Either<Exception, List<Pokemon>>> getAllPokemons(int page) async {
   }
 
   @override
-  Future<void> saveScrollPosition(double position) async {
-    print("save scroll position");
-    return await localDataSource.saveScrollPosition(position);
+  Future<void> saveScrollPercentage(double percentage) async {
+    print("save scroll percentage");
+    return await localDataSource.saveScrollPercentage(percentage);
   }
 
   @override
-  Future<double?> getScrollPosition() async {
-    return await localDataSource.getScrollPosition();
+  Future<double?> getScrollPercentage() async {
+    return await localDataSource.getScrollPercentage();
   }
 
   @override

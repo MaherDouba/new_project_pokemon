@@ -38,14 +38,14 @@ Future<void> setupServiceLocator() async {
       remoteDataSource: sl(), localDataSource: sl(), networkInfo: sl()));
 
    // Use Cases
-  sl.registerLazySingleton(() => SaveScrollPosition(sl()));
-  sl.registerLazySingleton(() => GetScrollPosition(sl()));
+  sl.registerLazySingleton(() => SaveScrollPercentage(sl()));
+  sl.registerLazySingleton(() => GetScrollPercentage(sl()));
   sl.registerLazySingleton(()=> GetAllPokemonsUsecase(sl()));
   sl.registerLazySingleton(()=> SaveCurrentPage(sl()));
   sl.registerLazySingleton(()=> GetCurrentPage(sl()));
 
   getIt.registerFactory<PokemonBloc>(
-    () => PokemonBloc(getAllPokemons: getIt(), getScrollPosition: getIt(), saveCurrentPage: getIt(), getCurrentPage: getIt()),
+    () => PokemonBloc(getAllPokemons: getIt(), getScrollPercentage: getIt(), saveCurrentPage: getIt(), getCurrentPage: getIt()),
   );
 
   //!core

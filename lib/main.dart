@@ -4,6 +4,7 @@ import 'core/services/service_locator.dart';
 import 'presentation/bloc/pokemon_bloc.dart';
 import 'presentation/screens/pokemon_list_screen.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupServiceLocator();
