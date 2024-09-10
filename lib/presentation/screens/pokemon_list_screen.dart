@@ -22,7 +22,8 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   void initState() {
     super.initState();
     context.read<PokemonBloc>().add(GetPokemonsEvent());
-  _scrollController.addListener(_onScroll);
+    _scrollController.addListener(_onScroll);
+    
     // Restore the scroll position
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final state = context.read<PokemonBloc>().state;
@@ -32,26 +33,14 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
     });
     
     // Save scroll percentage on scroll
-     _scrollController.addListener(() {
+    _scrollController.addListener(() {
       if (_scrollController.hasClients) {
-         final state = context.read<PokemonBloc>().state;
-         if (state is PokemonLoaded ) {
-          
-            double max = _scrollController.position.maxScrollExtent * (state.currentPage);
-            print("maxScrollExtent =${_scrollController.position.maxScrollExtent} ");
-            double scrollPercentage = _scrollController.offset / max ;
-            print("current page  = ${state.currentPage}");
-            print("offset =${_scrollController.offset} ");
-            print("maxScroll =${max} ");
-            print(" offset /maxScroll =${scrollPercentage} ");
-
-        sl<SaveScrollPercentage>().call(scrollPercentage);
-         }
-      /*  double scrollPercentage = _scrollController.offset / _scrollController.position.maxScrollExtent;
-        print(" _scrollController.offset =${_scrollController.offset} ");
-        print(" _scrollController.position.maxScrollExtent =${_scrollController.position.maxScrollExtent} ");
-        print(" offset /maxScrollExtent =${scrollPercentage} ");
-        sl<SaveScrollPercentage>().call(scrollPercentage);*/
+        final state = context.read<PokemonBloc>().state;
+        if (state is PokemonLoaded) {
+          double max = _scrollController.position.maxScrollExtent;
+          double scrollPercentage = _scrollController.offset / max;
+          sl<SaveScrollPercentage>().call(scrollPercentage);
+        }
       }
     });
   }
@@ -61,17 +50,15 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
     if (_scrollController.hasClients) {
       final maxScroll = _scrollController.position.maxScrollExtent;
       final scrollTo = maxScroll * scrollPercentage;
-      print("scrollPercentage....$scrollPercentage");
-      print("scrollTo .... $scrollTo");
       _scrollController.jumpTo(scrollTo);
     }
   }
 
   void _onScroll() {
     final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
+    double currentScroll = _scrollController.position.pixels;
     
-    if (currentScroll == maxScroll && !isLoadingMore) {
+    if (currentScroll == maxScroll  && !isLoadingMore) {
       setState(() {
         isLoadingMore = true;
       });
@@ -86,11 +73,6 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
 
   @override
   void dispose() {
-    // Save scroll percentage on dispose
-    if (_scrollController.hasClients) {
-      double scrollPercentage = _scrollController.offset / _scrollController.position.maxScrollExtent;
-      sl<SaveScrollPercentage>().call(scrollPercentage);
-    }
     _scrollController.dispose();
     super.dispose();
   }
@@ -101,23 +83,39 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
       appBar: AppBar(
         title: const Text('Pokemons'),
       ),
-      body: BlocBuilder<PokemonBloc, PokemonState>(
+      body: BlocConsumer<PokemonBloc, PokemonState>(
+        listener: (context, state) {
+          if (state is PokemonLoaded && isLoadingMore) {
+            setState(() {
+              isLoadingMore = false;
+            });
+            // Scroll to the top of the new items
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+              //  final newPosition = _scrollController.position.maxScrollExtent - 6030.0; 
+                _scrollController.animateTo(
+                   0.1,
+                  duration: Duration(milliseconds: 100),
+                  curve: Curves.easeOut,
+                );
+              }
+            });
+          }
+        },
         builder: (context, state) {
           if (state is PokemonLoading) {
             return ListView.builder(
-           //   controller: _scrollController,
               itemCount: 20,
               itemBuilder: (context, index) => ShimmerPostWidget(),
             );
-          } else if (state is PokemonLoaded ) {
+          } else if (state is PokemonLoaded) {
             isLoadingPrevious = false;
-            isLoadingMore = false;
             return LayoutBuilder(
               builder: (context, constraints) {
                 final screenWidth = constraints.maxWidth;
                 final crossAxisCount = screenWidth < 600 ? 2 : 4;
                 final childAspectRatio = screenWidth < 600 ? 3 / 4 : 2 / 3;
-                  return Scrollbar(
+                return Scrollbar(
                   controller: _scrollController,
                   thumbVisibility: true,
                   trackVisibility: true,
@@ -195,90 +193,3 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
     );
   }
 }
-
-
-
-
-
-
-/*
-
-
-   // final itemHeight = _scrollController.position.maxScrollExtent / state.pokemons.length;
-  // max = max - itemHeight;
-
-  @override
-  void initState() {
-    super.initState();
-    context.read<PokemonBloc>().add(GetPokemonsEvent());
-    _scrollController.addListener(_onScroll);
-    
-    // Restore the scroll position
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final state = context.read<PokemonBloc>().state;
-      if (state is PokemonLoaded && state.scrollPosition > 0.0) {
-        await _restoreScrollPosition(state.scrollPosition);
-      }
-    });
-    
-    // Save scroll percentage on scroll
-    _scrollController.addListener(() {
-      if (_scrollController.hasClients) {
-        double scrollPercentage = _scrollController.offset / _scrollController.position.maxScrollExtent;
-        sl<SaveScrollPosition>().call(scrollPercentage);
-      }
-    });
-  }
-
-Future<void> _restoreScrollPosition(double scrollPercentage) async {
-  await Future.delayed(Duration(milliseconds: 100));
-  if (_scrollController.hasClients) {
-    final state = context.read<PokemonBloc>().state;
-    if (state is PokemonLoaded) {
-      final cachedCount = (state.currentPage-1 )*50 ;
-      print("state.currentPage = ${state.currentPage}");
-       print("cachedCount = $cachedCount");
-      final itemHeight = 150.0;
-      final totalItemsHeight = cachedCount * itemHeight;
-      final visibleItemsHeight = _scrollController.position.viewportDimension;
-      print("visibleItemsHeight = $visibleItemsHeight");
-      final scrollableHeight = totalItemsHeight - visibleItemsHeight;
-      
-      if (scrollableHeight > 0) {
-        final scrollTo = scrollableHeight * scrollPercentage;
-        _scrollController.jumpTo(scrollTo);
-      }
-    }
-  }
-}
-
-  void _onScroll() {
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
-    
-    if (currentScroll == maxScroll && !isLoadingMore) {
-      setState(() {
-        isLoadingMore = true;
-      });
-      context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
-    } else if (currentScroll == 0 && !isLoadingPrevious) {
-      setState(() {
-        isLoadingPrevious = true;
-      });
-      context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
-    }
-  }
-
-  @override
-  void dispose() {
-    // Save scroll percentage on dispose
-    if (_scrollController.hasClients) {
-      double scrollPercentage = _scrollController.offset / _scrollController.position.maxScrollExtent;
-      sl<SaveScrollPosition>().call(scrollPercentage);
-    }
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-
- */

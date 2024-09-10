@@ -39,35 +39,37 @@ class PokemonRepositoryImpl implements PokemonRepository {
     }
   }
 
-  Future<Either<Exception, List<Pokemon>>> _getLocalPokemonsCircular(int page) async {
+  Future<Either<Exception, List<Pokemon>>> _getLocalPokemonsCircular(
+      int page) async {
     try {
       List<int> cachedPages = await localDataSource.getCachedPages();
       if (cachedPages.isEmpty) {
         return Left(EmptyCacheException());
       }
 
-      int pageToFetch = cachedPages.contains(page) ? page : cachedPages.first;
-      final localPokemons = await localDataSource.getCachedPokemons(pageToFetch);
-      
+      int pageToFetch = cachedPages.contains(page) ? page : cachedPages.last;
+      final localPokemons =
+          await localDataSource.getCachedPokemons(pageToFetch);
       if (localPokemons.isEmpty) {
         pageToFetch = await localDataSource.getNextCachedPage(pageToFetch);
-        final nextPagePokemons = await localDataSource.getCachedPokemons(pageToFetch);
-        await saveCurrentPage(pageToFetch);
+        final nextPagePokemons =
+            await localDataSource.getCachedPokemons(pageToFetch);
         return Right(nextPagePokemons);
       }
 
-      await saveCurrentPage(pageToFetch);
       return Right(localPokemons);
     } catch (e) {
       return Left(EmptyCacheException());
     }
   }
 
-  Future<Either<Exception, List<Pokemon>>> _fetchAndCacheRemotePokemons(int page) async {
+  Future<Either<Exception, List<Pokemon>>> _fetchAndCacheRemotePokemons(
+      int page) async {
     try {
-      final remotePokemons = await remoteDataSource.getAllPokemons(page);    
+      final remotePokemons = await remoteDataSource.getAllPokemons(page);
       double? currentScrollPercentage = await getScrollPercentage();
-      await localDataSource.cachePokemons(remotePokemons, page, currentScrollPercentage ?? 0.0);     
+      await localDataSource.cachePokemons(
+          remotePokemons, page, currentScrollPercentage ?? 0.0);
       return Right(remotePokemons);
     } catch (e) {
       return Left(ServerException());
@@ -93,5 +95,5 @@ class PokemonRepositoryImpl implements PokemonRepository {
   @override
   Future<int> getCurrentPage() async {
     return await localDataSource.getCurrentPage();
-  }  
+  }
 }

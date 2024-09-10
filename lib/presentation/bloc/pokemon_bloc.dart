@@ -13,8 +13,8 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
   final GetScrollPercentage getScrollPercentage;
   final SaveCurrentPage saveCurrentPage;
   final GetCurrentPage getCurrentPage;
-  int currentPage_var = 1; 
-
+  int currentPage_var = 1;
+  
    PokemonBloc({
     required this.getAllPokemons, 
     required this.getScrollPercentage,
@@ -53,7 +53,7 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
       final currentState = state as PokemonLoaded;
       currentPage_var++;
       await saveCurrentPage(currentPage_var);
-      final currentPokemons = currentState.pokemons;
+    //  final currentPokemons = currentState.pokemons;
       
       final failureOrPokemonList = await getAllPokemons(page: currentPage_var);
       failureOrPokemonList.fold(
@@ -64,9 +64,10 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
           if (pokemonList.isEmpty) {
             emit(currentState.copyWith(hasReachedMax: true));
           } else {
+            
             emit(PokemonLoaded(
-              pokemons: currentPokemons + pokemonList,
-              scrollPercentage: currentState.scrollPercentage,
+              pokemons:  pokemonList,
+              scrollPercentage: 0.0,
               hasReachedMax: false,
               currentPage: currentPage_var,
             ));
@@ -89,7 +90,7 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
         (pokemonList) {
           emit(PokemonLoaded(
             pokemons: pokemonList,
-            scrollPercentage: 0.0,
+            scrollPercentage: 1.0,
             hasReachedMax: false,
             currentPage: currentPage_var,
           ));
