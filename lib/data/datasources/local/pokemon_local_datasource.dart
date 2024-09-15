@@ -5,17 +5,17 @@ import '../../models/pokemon_model.dart';
 
 abstract class PokemonLocalDataSource {
   Future<List<PokemonModel>> getCachedPokemons(int page);
-  Future<void> cachePokemons(List<PokemonModel> pokemons, int page, double scrollPercentage);
-  Future<void> saveScrollPercentage(double percentage);
-  Future<double?> getScrollPercentage();
+  Future<void> cachePokemons(List<PokemonModel> pokemons, int page);
+  Future<void> saveScrollPosition(int page, String pokemonName);
+  Future<String?> getScrollPosition(int page);
   Future<void> saveCurrentPage(int page);
   Future<int> getCurrentPage();
   Future<List<int>> getCachedPages();
-  Future<int> getNextCachedPage(int currentPage); 
+  Future<int> getNextCachedPage(int currentPage);
 }
 
 const CACHED_POKEMONS = 'CACHED_POKEMONS_PAGE_';
-const String SCROLL_PERCENTAGE_KEY = 'SCROLL_PERCENTAGE_KEY_';
+const String SCROLL_POSITION_KEY = 'SCROLL_POSITION_KEY_';
 const String CURRENT_PAGE_KEY = 'CURRENT_PAGE_KEY';
 const String CACHED_PAGES_KEY = 'CACHED_PAGES_KEY';
 
@@ -25,8 +25,7 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
   PokemonLocalDataSourceImpl({required this.sharedPreferences});
 
   @override
-  Future<void> cachePokemons(List<PokemonModel> pokemonModel, int page, double scrollPercentage) async {
-    await saveScrollPercentage(scrollPercentage);
+  Future<void> cachePokemons(List<PokemonModel> pokemonModel, int page) async {
     List pokemonModelToList = pokemonModel.map<Map<String, dynamic>>((pokemonModel) => pokemonModel.toJson()).toList();
     await sharedPreferences.setString('$CACHED_POKEMONS$page', json.encode(pokemonModelToList));
     
@@ -37,7 +36,6 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
     }
     
     print("pokimonons were stored for the page $page");
-    return Future.value(null);
   }
 
   @override
@@ -53,15 +51,13 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
   }
 
   @override
-  Future<void> saveScrollPercentage(double percentage) async {
-    int currentPage = await getCurrentPage();
-    await sharedPreferences.setDouble('$SCROLL_PERCENTAGE_KEY$currentPage', percentage);
+  Future<void> saveScrollPosition(int page, String pokemonName) async {
+    await sharedPreferences.setString('$SCROLL_POSITION_KEY$page', pokemonName);
   }
 
   @override
-  Future<double?> getScrollPercentage() async {
-    int currentPage = await getCurrentPage();
-    return sharedPreferences.getDouble('$SCROLL_PERCENTAGE_KEY$currentPage');
+  Future<String?> getScrollPosition(int page) async {
+    return sharedPreferences.getString('$SCROLL_POSITION_KEY$page');
   }
 
   @override

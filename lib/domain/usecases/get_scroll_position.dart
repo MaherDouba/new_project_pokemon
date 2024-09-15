@@ -1,11 +1,11 @@
-import 'package:untitled/domain/repositories/pokemon_repository.dart';
+import '../repositories/pokemon_repository.dart';
 
-class GetScrollPercentage {
+class GetScrollPosition {
   final PokemonRepository repository;
 
-  GetScrollPercentage(this.repository);
+  GetScrollPosition(this.repository);
 
-  Future<double?> call() async {
-    return await repository.getScrollPercentage();
+  Future<String?> call(int page) async {
+    return await repository.getScrollPosition(page);
   }
 }

@@ -5,7 +5,7 @@ import '../bloc/pokemon_bloc.dart';
 
 class PokemonErrorWidget extends StatelessWidget {
   final String message;
-
+  final String elementName = 'pokemonList';
   const PokemonErrorWidget({Key? key, required this.message}) : super(key: key);
 
   @override

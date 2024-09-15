@@ -24,35 +24,33 @@ Future<void> setupServiceLocator() async {
   getIt.registerLazySingleton<http.Client>(() => http.Client());
 
   getIt.registerLazySingleton<PokemonRemoteDataSource>(
-    () => PokemonRemoteDataSourceImpl(client: getIt() ),
+    () => PokemonRemoteDataSourceImpl(client: getIt()),
   );
 
   getIt.registerLazySingleton<PokemonLocalDataSource>(
     () => PokemonLocalDataSourceImpl(sharedPreferences: getIt()),
   );
 
-
-  // _____________Repository________________
-
   sl.registerLazySingleton<PokemonRepository>(() => PokemonRepositoryImpl(
       remoteDataSource: sl(), localDataSource: sl(), networkInfo: sl()));
 
-   // Use Cases
-  sl.registerLazySingleton(() => SaveScrollPercentage(sl()));
-  sl.registerLazySingleton(() => GetScrollPercentage(sl()));
-  sl.registerLazySingleton(()=> GetAllPokemonsUsecase(sl()));
-  sl.registerLazySingleton(()=> SaveCurrentPage(sl()));
-  sl.registerLazySingleton(()=> GetCurrentPage(sl()));
+  sl.registerLazySingleton(() => SaveScrollPosition(sl()));
+  sl.registerLazySingleton(() => GetScrollPosition(sl()));
+  sl.registerLazySingleton(() => GetAllPokemonsUsecase(sl()));
+  sl.registerLazySingleton(() => SaveCurrentPage(sl()));
+  sl.registerLazySingleton(() => GetCurrentPage(sl()));
 
   getIt.registerFactory<PokemonBloc>(
-    () => PokemonBloc(getAllPokemons: getIt(), getScrollPercentage: getIt(), saveCurrentPage: getIt(), getCurrentPage: getIt()),
+    () => PokemonBloc(
+      getAllPokemons: getIt(),
+      getScrollPosition: getIt(),
+      saveScrollPosition: getIt(),
+      saveCurrentPage: getIt(),
+      getCurrentPage: getIt(),
+    ),
   );
 
-  //!core
-    sl.registerLazySingleton<NetworkInfo>(() => NetworkInfo()); 
+  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfo());
 
-  //! External
- sl.registerLazySingleton(() => InternetConnectionChecker());
-
-
+  sl.registerLazySingleton(() => InternetConnectionChecker());
 }

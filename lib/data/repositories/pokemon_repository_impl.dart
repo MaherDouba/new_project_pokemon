@@ -39,8 +39,7 @@ class PokemonRepositoryImpl implements PokemonRepository {
     }
   }
 
-  Future<Either<Exception, List<Pokemon>>> _getLocalPokemonsCircular(
-      int page) async {
+  Future<Either<Exception, List<Pokemon>>> _getLocalPokemonsCircular(int page) async {
     try {
       List<int> cachedPages = await localDataSource.getCachedPages();
       if (cachedPages.isEmpty) {
@@ -48,12 +47,10 @@ class PokemonRepositoryImpl implements PokemonRepository {
       }
 
       int pageToFetch = cachedPages.contains(page) ? page : cachedPages.last;
-      final localPokemons =
-          await localDataSource.getCachedPokemons(pageToFetch);
+      final localPokemons = await localDataSource.getCachedPokemons(pageToFetch);
       if (localPokemons.isEmpty) {
         pageToFetch = await localDataSource.getNextCachedPage(pageToFetch);
-        final nextPagePokemons =
-            await localDataSource.getCachedPokemons(pageToFetch);
+        final nextPagePokemons = await localDataSource.getCachedPokemons(pageToFetch);
         return Right(nextPagePokemons);
       }
 
@@ -63,13 +60,10 @@ class PokemonRepositoryImpl implements PokemonRepository {
     }
   }
 
-  Future<Either<Exception, List<Pokemon>>> _fetchAndCacheRemotePokemons(
-      int page) async {
+  Future<Either<Exception, List<Pokemon>>> _fetchAndCacheRemotePokemons(int page) async {
     try {
       final remotePokemons = await remoteDataSource.getAllPokemons(page);
-      double? currentScrollPercentage = await getScrollPercentage();
-      await localDataSource.cachePokemons(
-          remotePokemons, page, currentScrollPercentage ?? 0.0);
+      await localDataSource.cachePokemons(remotePokemons, page);
       return Right(remotePokemons);
     } catch (e) {
       return Left(ServerException());
@@ -77,14 +71,13 @@ class PokemonRepositoryImpl implements PokemonRepository {
   }
 
   @override
-  Future<void> saveScrollPercentage(double percentage) async {
-    print("save scroll percentage");
-    return await localDataSource.saveScrollPercentage(percentage);
+  Future<void> saveScrollPosition(int page, String pokemonName) async {
+    return await localDataSource.saveScrollPosition(page, pokemonName);
   }
 
   @override
-  Future<double?> getScrollPercentage() async {
-    return await localDataSource.getScrollPercentage();
+  Future<String?> getScrollPosition(int page) async {
+    return await localDataSource.getScrollPosition(page);
   }
 
   @override
