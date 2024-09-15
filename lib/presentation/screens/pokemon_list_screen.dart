@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/scroll_helper/visibility_detector.dart';
 import '../../domain/entities/pokemon.dart';
 import '../bloc/pokemon_bloc.dart';
 import '../widgets/pokemon_error_widget.dart';
@@ -136,7 +137,13 @@ Future<void> _restoreScrollPosition() async {
                     itemBuilder: (context, index) {
                       if (index < state.pokemons.length) {
                         final pokemon = state.pokemons[index];
-                        return _buildPokemonCard(pokemon, screenWidth);
+                        return VisibilityDetector(
+                            key: Key(pokemon.name),
+                            onVisibilityChanged: (VisibilityInfo info) {
+                              debugPrint("${info.key.toString().split("[<'")[1].split("'>]")[0]} of my widget is visible");
+                            },
+                          child: _buildPokemonCard(pokemon, screenWidth)
+                        );
                       } else {
                         return const Center(            
                           child: Padding(
