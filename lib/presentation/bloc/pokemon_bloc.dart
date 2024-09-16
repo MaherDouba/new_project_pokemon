@@ -32,69 +32,25 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
   }
   
 Future<void> _onGetPokemonsEvent(GetPokemonsEvent event, Emitter<PokemonState> emit) async {
-  emit(PokemonLoading());
-  currentPage_var = await getCurrentPage();
-
-  final savedScrollPosition = await getScrollPosition(currentPage_var);
-  print("savedscrollposition $savedScrollPosition");
-  
-  List<Pokemon> currentPagePokemons = [];
-  List<Pokemon> previousPagePokemons = [];
-  List<Pokemon> nextPagePokemons = [];
-
-  final currentPageResult = await getAllPokemons(page: currentPage_var);
-  currentPageResult.fold(
-    (failure) {
-      emit(PokemonError(message: 'Failed to fetch pokemons: ${failure.toString()}'));
-      return;
-    },
-    (pokemonList) {
-      currentPagePokemons = pokemonList;
+    emit(PokemonLoading());
+    currentPage_var = await getCurrentPage();
+    final savedScrollPosition = await getScrollPosition(currentPage_var);
     
-    },
-  );
-
-  if (savedScrollPosition != null) {
-    final savedIndex = currentPagePokemons.indexWhere((pokemon) => pokemon.name == savedScrollPosition);
-    print("savedindex $savedIndex");
-      final lastPokemon = currentPagePokemons.last; 
-      print("lastPokemon $lastPokemon");
-  final lastIndex = currentPagePokemons.indexOf(lastPokemon); 
-  print("lastIndex $lastIndex");  
-  print("currentPagePokemons.length ${currentPagePokemons.length}");
-    if (savedIndex < 7 && currentPage_var > 1) {
-      final previousPageResult = await getAllPokemons(page: currentPage_var - 1);
-      previousPageResult.fold(
-        (failure) {
-        },
-        (pokemonList) {
-          previousPagePokemons = pokemonList;
-          
-        },
-      );
-    }
-    
-    else if (savedIndex >= currentPagePokemons.length - 6) {
-      final nextPageResult = await getAllPokemons(page: currentPage_var + 1);
-      print("currentPagePokemons.length - 6 ${currentPagePokemons.length - 6}");
-      nextPageResult.fold(
-        (failure) {
-        },
-        (pokemonList) {
-          nextPagePokemons = pokemonList;
-        },
-      );
-    }
+    final currentPageResult = await getAllPokemons(page: currentPage_var);
+    currentPageResult.fold(
+      (failure) {
+        emit(PokemonError(message: 'Failed to fetch pokemons: ${failure.toString()}'));
+      },
+      (pokemonList) {
+        emit(PokemonLoaded(
+          pokemons: pokemonList,
+          scrollPokemonName: savedScrollPosition,
+          hasReachedMax: false,
+          currentPage: currentPage_var,
+        ));
+      },
+    );
   }
-
-
-  emit(PokemonLoaded(
-    pokemons: [...previousPagePokemons, ...currentPagePokemons ,...nextPagePokemons],
-    scrollPokemonName: savedScrollPosition,
-    hasReachedMax: false,
-    currentPage: currentPage_var,
-  ));
-}
 
 
 
@@ -149,5 +105,8 @@ Future<void> _onGetPokemonsEvent(GetPokemonsEvent event, Emitter<PokemonState> e
 
   Future<void> _onSaveScrollPositionEvent(SaveScrollPositionEvent event, Emitter<PokemonState> emit) async {
     await saveScrollPosition(event.page, event.pokemonName);
+    if (state is PokemonLoaded) {
+      emit((state as PokemonLoaded).copyWith(scrollPokemonName: event.pokemonName));
+    }
   }
 }

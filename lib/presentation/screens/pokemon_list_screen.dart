@@ -17,7 +17,8 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   final ScrollController _scrollController = ScrollController();
   bool isLoadingMore = false;
   bool isLoadingPrevious = false;
-  
+   String? _lastVisiblePokemonName;
+
   @override
   void initState() {
     super.initState();
@@ -31,21 +32,19 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
      context.read<PokemonBloc>().add(GetPokemonsEvent());
   }
 
-Future<void> _restoreScrollPosition() async {
-  final state = context.read<PokemonBloc>().state;
-  if (state is PokemonLoaded && state.scrollPokemonName != null) {
-    final index = state.pokemons.indexWhere((pokemon) => pokemon.name == state.scrollPokemonName);
-    print("index = $index");
-    if (index != -1) {
-      await Future.delayed(Duration(milliseconds: 100));
-      if (_scrollController.hasClients) {
-        final itemHeight = MediaQuery.of(context).size.width / 2;
-        final offset = index * itemHeight;
-        _scrollController.jumpTo(offset);
+  Future<void> _restoreScrollPosition() async {
+    final state = context.read<PokemonBloc>().state;
+    if (state is PokemonLoaded && state.scrollPokemonName != null) {
+      final index = state.pokemons.indexWhere((pokemon) => pokemon.name == state.scrollPokemonName);
+      if (index != -1) {
+        await Future.delayed(Duration(milliseconds: 100));
+        if (_scrollController.hasClients) {
+          final itemPosition = index ~/ 2; // افتراض أن هناك عمودين
+          _scrollController.jumpTo(itemPosition * (MediaQuery.of(context).size.width / 2));
+        }
       }
     }
   }
-}
 
   void _onScroll() {
     final maxScroll = _scrollController.position.maxScrollExtent;
@@ -63,26 +62,6 @@ Future<void> _restoreScrollPosition() async {
       context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
     }
 
-    _saveScrollPosition();
-  }
-
-  void _saveScrollPosition() {
-    if (_scrollController.hasClients) {
-      final state = context.read<PokemonBloc>().state;
-      if (state is PokemonLoaded) {
-        final itemHeight = MediaQuery.of(context).size.width / 2;
-        final firstVisibleItemIndex = (_scrollController.offset / itemHeight).round();
-        if (firstVisibleItemIndex >= 0 && firstVisibleItemIndex < state.pokemons.length) {
-          final pokemonName = state.pokemons[firstVisibleItemIndex].name;
-          context.read<PokemonBloc>().add(SaveScrollPositionEvent(
-            page: state.currentPage,
-            pokemonName: pokemonName,
-          ));
-          print("page ${state.currentPage}");
-          print("pokemonName..= $pokemonName");
-        }
-      }
-    }
   }
 
   @override
@@ -103,9 +82,6 @@ Future<void> _restoreScrollPosition() async {
             setState(() {
               isLoadingMore = false;
               isLoadingPrevious = false;
-            });
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-              _restoreScrollPosition();
             });
           }
         },
@@ -138,11 +114,17 @@ Future<void> _restoreScrollPosition() async {
                       if (index < state.pokemons.length) {
                         final pokemon = state.pokemons[index];
                         return VisibilityDetector(
-                            key: Key(pokemon.name),
-                            onVisibilityChanged: (VisibilityInfo info) {
-                              debugPrint("${info.key.toString().split("[<'")[1].split("'>]")[0]} of my widget is visible");
-                            },
-                          child: _buildPokemonCard(pokemon, screenWidth)
+                          key: Key(pokemon.name),
+                          onVisibilityChanged: (VisibilityInfo info) {
+                            if (info.visibleFraction > 0.5 && _lastVisiblePokemonName != pokemon.name) {
+                              _lastVisiblePokemonName = pokemon.name;
+                              context.read<PokemonBloc>().add(SaveScrollPositionEvent(
+                                page: state.currentPage,
+                                pokemonName: pokemon.name,
+                              ));
+                            }
+                          },
+                          child: _buildPokemonCard(pokemon, constraints.maxWidth),
                         );
                       } else {
                         return const Center(            
@@ -206,76 +188,3 @@ Future<void> _restoreScrollPosition() async {
     );
   }
 }
-
-
-
-/*
-
-Future<void> _restoreScrollPosition() async {
-  final state = context.read<PokemonBloc>().state;
-  if (state is PokemonLoaded && state.scrollPokemonName != null) {
-    final index = state.pokemons.indexWhere((pokemon) => pokemon.name == state.scrollPokemonName);
-    print("Restoring scroll position, index = $index");
-    if (index != -1) {
-      await Future.delayed(Duration(milliseconds: 100));
-      if (_scrollController.hasClients) {
-        final size = MediaQuery.of(context).size;
-        final itemWidth = size.width / 2;
-        final itemHeight = itemWidth; // افتراض أن العنصر مربع
-        final itemsPerRow = 2;
-
-        final rowIndex = index ~/ itemsPerRow;
-        final offset = rowIndex * itemHeight;
-
-        final viewportHeight = _scrollController.position.viewportDimension;
-        final middleOffset = math.max(0, offset - (viewportHeight / 2) + (itemHeight / 2));
-
-        _scrollController.animateTo(
-          middleOffset.toDouble(),
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-
-        print("Restored scroll position to pokemon: ${state.scrollPokemonName} at index $index");
-      }
-    }
-  }
-}
-
-void _saveScrollPosition() {
-  if (_scrollController.hasClients) {
-    final state = context.read<PokemonBloc>().state;
-    if (state is PokemonLoaded) {
-      final viewportHeight = _scrollController.position.viewportDimension;
-      final firstVisibleItemOffset = _scrollController.offset;
-      
-      final size = MediaQuery.of(context).size;
-      final itemWidth = size.width / 2;
-      final itemHeight = itemWidth; // افتراض أن العنصر مربع
-      final itemsPerRow = 2;
-      
-      final firstVisibleRowIndex = (firstVisibleItemOffset / itemHeight).floor();
-      final firstVisibleItemIndex = firstVisibleRowIndex * itemsPerRow;
-      
-      final visibleItemsCount = (viewportHeight / itemHeight).ceil() * itemsPerRow;
-      final lastVisibleItemIndex = math.min(
-        firstVisibleItemIndex + visibleItemsCount - 1,
-        state.pokemons.length - 1
-      );
-      
-      final middleItemIndex = ((firstVisibleItemIndex + lastVisibleItemIndex) / 2).round();
-      
-      if (middleItemIndex >= 0 && middleItemIndex < state.pokemons.length) {
-        final pokemonName = state.pokemons[middleItemIndex].name;
-        context.read<PokemonBloc>().add(SaveScrollPositionEvent(
-          page: state.currentPage,
-          pokemonName: pokemonName,
-        ));
-        
-        print("Saved scroll position: page ${state.currentPage}, pokemonName = $pokemonName, index = $middleItemIndex");
-      }
-    }
-  }
-}
-
- */
