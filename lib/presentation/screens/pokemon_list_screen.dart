@@ -17,52 +17,60 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   final ScrollController _scrollController = ScrollController();
   bool isLoadingMore = false;
   bool isLoadingPrevious = false;
-   String? _lastVisiblePokemonName;
+  String? _lastVisiblePokemonName;
+ 
+  int? currentPage;
+  late int visiblePages ;
+  int? InvisibleLoadedPages;
+  late int totalPagesLoaded;
 
   @override
   void initState() {
     super.initState();
-   
+     context.read<PokemonBloc>().add(GetPokemonsEvent());
     _scrollController.addListener(_onScroll);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       print("initState ...... addPostFrameCallback");
       await _restoreScrollPosition();
     });
-     context.read<PokemonBloc>().add(GetPokemonsEvent());
   }
 
-  Future<void> _restoreScrollPosition() async {
-    final state = context.read<PokemonBloc>().state;
-    if (state is PokemonLoaded && state.scrollPokemonName != null) {
-      final index = state.pokemons.indexWhere((pokemon) => pokemon.name == state.scrollPokemonName);
-      if (index != -1) {
-        await Future.delayed(Duration(milliseconds: 100));
-        if (_scrollController.hasClients) {
-          final itemPosition = index ~/ 2; // افتراض أن هناك عمودين
-          _scrollController.jumpTo(itemPosition * (MediaQuery.of(context).size.width / 2));
-        }
-      }
-    }
+
+Future<void> _onScroll() async {
+  final maxScroll = _scrollController.position.maxScrollExtent;
+  final currentScroll = _scrollController.offset;
+  
+  // total pages loaded 
+  final state =  context.read<PokemonBloc>().state;
+  if (state is PokemonLoaded ) {
+   totalPagesLoaded = state.currentPage;
+  print("total pages = $totalPagesLoaded");
   }
 
-  void _onScroll() {
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.offset;
-    print("currentscroll = $currentScroll");
-    if (currentScroll == maxScroll && !isLoadingMore) {
-      setState(() {
-        isLoadingMore = true;
-      });
-      context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
-    } else if (currentScroll <100 && !isLoadingPrevious ) {
-      setState(() {
-        isLoadingPrevious = true;
-      });
-      context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
-    }
+  //number of visiblePages
+   visiblePages = (currentScroll / (maxScroll / totalPagesLoaded)).ceil();
+   print("visiblePages : $visiblePages");
 
+ //number of InvisibleLoadedPages
+  InvisibleLoadedPages = totalPagesLoaded - visiblePages!;
+   print("InvisibleLoadedPages : $InvisibleLoadedPages");
+
+
+  if (currentScroll >= maxScroll && !isLoadingMore) {
+    setState(() {
+      isLoadingMore = true;
+    });
+    context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
   }
+  if (currentScroll == 0 && !isLoadingPrevious) {
+    setState(() {
+      isLoadingPrevious = true;
+    });
+    context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
+     await _restoreScrollPosition();
+  }
+}
 
   @override
   void dispose() {
@@ -83,8 +91,8 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
               isLoadingMore = false;
               isLoadingPrevious = false;
             });
-          }
-        },
+    }
+  },
         builder: (context, state) {
           if (state is PokemonLoading) {
             return ListView.builder(
@@ -119,9 +127,11 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
                             if (info.visibleFraction > 0.5 && _lastVisiblePokemonName != pokemon.name) {
                               _lastVisiblePokemonName = pokemon.name;
                               context.read<PokemonBloc>().add(SaveScrollPositionEvent(
-                                page: state.currentPage,
+                                page:state.currentPage,    
                                 pokemonName: pokemon.name,
                               ));
+                              print("state.currentpage from VisibilityDetector = ${state.currentPage}");
+                              print("pokemon name from visibledetector  = ${pokemon.name}");
                             }
                           },
                           child: _buildPokemonCard(pokemon, constraints.maxWidth),
@@ -187,4 +197,49 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
       ),
     );
   }
+
+Future<void> _restoreScrollPosition() async {
+  final state = context.read<PokemonBloc>().state;
+  if (state is PokemonLoaded && state.scrollPokemonName != null) {
+    final index = state.pokemons.indexWhere((pokemon) => pokemon.name == state.scrollPokemonName);
+    print("index from _restoreScrollPosition= $index");
+
+    if (index != -1) {
+    
+       //if its among the firsst elements , it also restores the previous page .
+      if (index >= 0 && index <= 8 && state.currentPage!=1) {
+        setState(() {
+          isLoadingPrevious = true;
+        });
+        context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
+        if (_scrollController.hasClients) {
+          await Future.delayed(Duration(milliseconds: 100));
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent + 300);
+          print("Scrolled to the end of the previous page");
+        }
+      } 
+
+      // if its among the last items , it brings the next page asss well.
+      else if (index >= state.pokemons.length - 8) {
+        setState(() {
+          isLoadingMore = true;
+        });
+        context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
+        await Future.delayed(Duration(milliseconds: 100));
+        if (_scrollController.hasClients) {
+          final itemPosition = index ~/ 2; 
+          _scrollController.jumpTo(itemPosition * (MediaQuery.of(context).size.width / 2)+1000);
+        }
+      } 
+      else {
+        await Future.delayed(Duration(milliseconds: 100));
+        if (_scrollController.hasClients) {
+          final itemPosition = index ~/ 2;
+          _scrollController.jumpTo(itemPosition * (MediaQuery.of(context).size.width / 2));
+        }
+      }
+    }
+  }
+}
+
 }
