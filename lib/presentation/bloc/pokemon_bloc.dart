@@ -99,7 +99,7 @@ Future<void> _onGetPokemonsEvent(GetPokemonsEvent event, Emitter<PokemonState> e
         },
         (pokemonList) {
           emit(PokemonLoaded(
-            pokemons: pokemonList,
+            pokemons: pokemonList ,
             scrollPokemonName: null,
             hasReachedMax: false,
             currentPage: currentPage_var,
