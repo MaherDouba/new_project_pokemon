@@ -19,61 +19,29 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
   bool isLoadingPrevious = false;
   String? _lastVisiblePokemonName;
 
-  int? currentPage;
-  late int visiblePages;
-  int? InvisibleLoadedPages;
-  late int totalPagesLoaded;
-
   @override
   void initState() {
     super.initState();
     context.read<PokemonBloc>().add(GetPokemonsEvent());
     _scrollController.addListener(_onScroll);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      print("initState ...... addPostFrameCallback");
-      await _restoreScrollPosition();
-    });
   }
 
   Future<void> _onScroll() async {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.offset;
 
-    // total pages loaded
-    final state = context.read<PokemonBloc>().state;
-    if (state is PokemonLoaded) {
-      totalPagesLoaded = state.currentPage;
-      print("total pages = $totalPagesLoaded");
-    }
-
-    //number of visiblePages
-    visiblePages = (currentScroll / (maxScroll / totalPagesLoaded)).ceil();
-    print("visiblePages : $visiblePages");
-
-    //number of InvisibleLoadedPages
-    InvisibleLoadedPages = totalPagesLoaded - visiblePages;
-    print("InvisibleLoadedPages : $InvisibleLoadedPages");
-
     if (currentScroll >= maxScroll && !isLoadingMore) {
       setState(() {
         isLoadingMore = true;
       });
-      print("loaaaaaaaaaad more from onscroll ");
       context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
     }
-    if (currentScroll <= 0.0 && !isLoadingPrevious && totalPagesLoaded!=1) {
+    if (currentScroll <= 0.0 && !isLoadingPrevious) {
       setState(() {
         isLoadingPrevious = true;
       });
       context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
-      if (_scrollController.hasClients) {
-        await Future.delayed(Duration(milliseconds: 300));
-        _scrollController
-            .jumpTo(_scrollController.position.maxScrollExtent);
-            
-      }
-     // _restoreScrollPosition();
+      
     }
   }
 
@@ -96,6 +64,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
               isLoadingMore = false;
               isLoadingPrevious = false;
             });
+            _scrollToSavedPosition(state);
           }
         },
         builder: (context, state) {
@@ -135,11 +104,8 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
                               context
                                   .read<PokemonBloc>()
                                   .add(SaveScrollPositionEvent(
-                                    page:totalPagesLoaded,
                                     pokemonName: pokemon.name,
                                   ));
-                              print(
-                                  "state.currentpage from VisibilityDetector = ${totalPagesLoaded}");
                               print(
                                   "pokemon name from visibledetector  = ${pokemon.name}");
                             }
@@ -209,48 +175,16 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
     );
   }
 
-  Future<void> _restoreScrollPosition() async {
-    final state = context.read<PokemonBloc>().state;
-    if (state is PokemonLoaded && state.scrollPokemonName != null) {
-      final index = state.pokemons
-          .indexWhere((pokemon) => pokemon.name == state.scrollPokemonName);
-      print("index from _restoreScrollPosition= $index");
-
+  void _scrollToSavedPosition(PokemonLoaded state) {
+    if (state.scrollPokemonName != null) {
+      final index = state.pokemons.indexWhere((pokemon) => pokemon.name == state.scrollPokemonName);
       if (index != -1) {
-        //if its among the firsst elements , it also restores the previous page .
-        if (index >= 0 && index <= 6 && state.currentPage != 1) {
-          setState(() {
-            isLoadingPrevious = true;
-          });
-          context.read<PokemonBloc>().add(LoadPreviousPokemonsEvent());
-          if (_scrollController.hasClients) {
-            await Future.delayed(Duration(milliseconds: 300));
-            _scrollController
-                .jumpTo(_scrollController.position.maxScrollExtent);
-            print("Scrolled to the end of the previous page");
-          }
-        }
-
-        // if its among the last items , it brings the next page asss well.
-        else if (index >= state.pokemons.length - 8) {
-          setState(() {
-            isLoadingMore = true;
-          });
-          context.read<PokemonBloc>().add(LoadMorePokemonsEvent());
-          await Future.delayed(Duration(milliseconds: 100));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_scrollController.hasClients) {
             final itemPosition = index ~/ 2;
-            _scrollController
-                .jumpTo(itemPosition * (MediaQuery.of(context).size.width / 2));
+            _scrollController.jumpTo(itemPosition * (MediaQuery.of(context).size.width / 2));
           }
-        } else {
-          await Future.delayed(Duration(milliseconds: 100));
-          if (_scrollController.hasClients) {
-            final itemPosition = index ~/ 2;
-            _scrollController
-                .jumpTo(itemPosition * (MediaQuery.of(context).size.width / 2));
-          }
-        }
+        });
       }
     }
   }

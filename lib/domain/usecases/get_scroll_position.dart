@@ -5,7 +5,7 @@ class GetScrollPosition {
 
   GetScrollPosition(this.repository);
 
-  Future<String?> call(int page) async {
-    return await repository.getScrollPosition(page);
+  Future<String?> call() async {
+    return await repository.getScrollPosition();
   }
 }

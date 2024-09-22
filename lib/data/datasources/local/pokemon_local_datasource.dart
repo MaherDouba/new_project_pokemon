@@ -6,13 +6,20 @@ import '../../models/pokemon_model.dart';
 abstract class PokemonLocalDataSource {
   Future<List<PokemonModel>> getCachedPokemons(int page);
   Future<void> cachePokemons(List<PokemonModel> pokemons, int page);
-  Future<void> saveScrollPosition(int page, String pokemonName);
-  Future<String?> getScrollPosition(int page);
+
+  Future<void> saveScrollPosition( String pokemonName);
+  Future<String?> getScrollPosition();
+
   Future<void> saveCurrentPage(int page);
   Future<int> getCurrentPage();
+  
   Future<List<int>> getCachedPages();
   Future<int> getNextCachedPage(int currentPage);
+
+  Future<void> saveAllPokemonNames(List<String> names);
+  Future<List<String>> getAllPokemonNames();
 }
+const String ALL_POKEMON_NAMES = "ALL_POKEMON_NAMES";
 
 const CACHED_POKEMONS = 'CACHED_POKEMONS_PAGE_';
 const String SCROLL_POSITION_KEY = 'SCROLL_POSITION_KEY_';
@@ -51,13 +58,14 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
   }
 
   @override
-  Future<void> saveScrollPosition(int page, String pokemonName) async {
-    await sharedPreferences.setString('$SCROLL_POSITION_KEY$page', pokemonName);
+  Future<void> saveScrollPosition(String pokemonName) async {
+    await sharedPreferences.setString('$SCROLL_POSITION_KEY', pokemonName);
+    
   }
 
   @override
-  Future<String?> getScrollPosition(int page) async {
-    return sharedPreferences.getString('$SCROLL_POSITION_KEY$page');
+  Future<String?> getScrollPosition() async {
+    return sharedPreferences.getString('$SCROLL_POSITION_KEY');
   }
 
   @override
@@ -93,4 +101,17 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
       return cachedPages[index + 1];
     }
   }
+
+  @override
+  Future<void> saveAllPokemonNames(List<String> names) async {
+    await sharedPreferences.setStringList(ALL_POKEMON_NAMES, names);
+  }
+
+  @override
+  Future<List<String>> getAllPokemonNames() async {
+    return sharedPreferences.getStringList(ALL_POKEMON_NAMES) ?? [];
+  }
+
+
+
 }

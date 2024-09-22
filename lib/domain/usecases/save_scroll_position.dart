@@ -5,7 +5,7 @@ class SaveScrollPosition {
 
   SaveScrollPosition(this.repository);
 
-  Future<void> call(int page, String pokemonName) async {
-    return await repository.saveScrollPosition(page, pokemonName);
+  Future<void> call(String pokemonName) async {
+    return await repository.saveScrollPosition( pokemonName);
   }
 }

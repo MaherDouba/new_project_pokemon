@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:untitled/core/error/exceptions.dart';
+import '../../core/error/failures.dart';
 import '../../core/network/network_info.dart';
 import '../../domain/entities/pokemon.dart';
 import '../../domain/repositories/pokemon_repository.dart';
@@ -71,13 +72,13 @@ class PokemonRepositoryImpl implements PokemonRepository {
   }
 
   @override
-  Future<void> saveScrollPosition(int page, String pokemonName) async {
-    return await localDataSource.saveScrollPosition(page, pokemonName);
+  Future<void> saveScrollPosition( String pokemonName) async {
+    return await localDataSource.saveScrollPosition( pokemonName);
   }
 
   @override
-  Future<String?> getScrollPosition(int page) async {
-    return await localDataSource.getScrollPosition(page);
+  Future<String?> getScrollPosition() async {
+    return await localDataSource.getScrollPosition();
   }
 
   @override
@@ -89,4 +90,25 @@ class PokemonRepositoryImpl implements PokemonRepository {
   Future<int> getCurrentPage() async {
     return await localDataSource.getCurrentPage();
   }
+  
+  @override
+  Future<Either<Failure, void>> saveAllPokemonNames(List<String> names) async {
+    try {
+      await localDataSource.saveAllPokemonNames(names);
+      return Right(null);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> getAllPokemonNames() async {
+    try {
+      final names = await localDataSource.getAllPokemonNames();
+      return Right(names);
+    } catch (e) {
+      return Left(EmptyCacheFailure());
+    }
+  }
+
 }
