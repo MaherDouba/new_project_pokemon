@@ -20,7 +20,6 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
   final GetCurrentPage getCurrentPage;
   final SaveAllPokemonNames saveAllPokemonNames;
   final GetAllPokemonNames getAllPokemonNames;
-
   int currentPage = 1;
   List<String> allPokemonNames = [];
 
@@ -70,9 +69,9 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
           hasReachedMax: false,
           currentPage: currentPage,
         ));
-      } else {
+      } /*else {
         await _loadInitialPage(emit);
-      }
+      }*/
     } else {
       await _loadInitialPage(emit);
     }
@@ -104,7 +103,7 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
 
     if (positionInPage <= 8 && currentPageIndex > 1) {
       return [currentPageIndex - 1, currentPageIndex];
-    } else if (positionInPage >= 40 && currentPageIndex < (allPokemonNames.length / 50).ceil()) {
+    } else if (positionInPage >= 40 ) {
       return [currentPageIndex, currentPageIndex + 1];
     } else {
       return [currentPageIndex];
@@ -187,7 +186,7 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
           _updateAllPokemonNames(pokemonList);
           emit(PokemonLoaded(
             pokemons: pokemonList,
-            scrollPokemonName: null,
+            scrollPokemonName: pokemonList.last.name,
             hasReachedMax: false,
             currentPage: currentPage,
           ));

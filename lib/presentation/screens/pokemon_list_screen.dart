@@ -182,7 +182,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_scrollController.hasClients) {
             final itemPosition = index ~/ 2;
-            _scrollController.jumpTo(itemPosition * (MediaQuery.of(context).size.width / 2));
+            _scrollController.jumpTo(itemPosition * (MediaQuery.of(context).size.width/2));
           }
         });
       }
