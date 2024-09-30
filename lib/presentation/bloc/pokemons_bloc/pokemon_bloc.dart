@@ -1,13 +1,15 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import '../../domain/entities/pokemon.dart';
-import '../../domain/usecases/get_all_pokemon_name.dart';
-import '../../domain/usecases/get_all_pokemons.dart';
-import '../../domain/usecases/get_current_page.dart';
-import '../../domain/usecases/get_scroll_position.dart';
-import '../../domain/usecases/save_all_poemonname.dart';
-import '../../domain/usecases/save_current_page.dart';
-import '../../domain/usecases/save_scroll_position.dart';
+import '../../../domain/entities/pokemon.dart';
+import '../../../domain/usecases/usecase_pokemon/get_all_pokemon_name.dart';
+import '../../../domain/usecases/usecase_pokemon/get_all_pokemons.dart';
+import '../../../domain/usecases/usecase_pokemon/get_current_page.dart';
+import '../../../domain/usecases/usecase_pokemon/get_scroll_position.dart';
+import '../../../domain/usecases/usecase_pokemon/save_all_poemonname.dart';
+import '../../../domain/usecases/usecase_pokemon/save_current_page.dart';
+import '../../../domain/usecases/usecase_pokemon/save_scroll_position.dart';
+import '../../../domain/usecases/usecase_pokemon/search_pokemons.dart';
+
 
 part 'pokemon_event.dart';
 part 'pokemon_state.dart';
@@ -20,6 +22,7 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
   final GetCurrentPage getCurrentPage;
   final SaveAllPokemonNames saveAllPokemonNames;
   final GetAllPokemonNames getAllPokemonNames;
+  final SearchPokemons searchPokemons;
   int currentPage = 1;
   List<String> allPokemonNames = [];
 
@@ -31,11 +34,13 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
     required this.getCurrentPage,
     required this.saveAllPokemonNames,
     required this.getAllPokemonNames,
+    required this.searchPokemons,
   }) : super(PokemonInitial()) {
     on<GetPokemonsEvent>(_onGetPokemonsEvent);
     on<LoadMorePokemonsEvent>(_onLoadMorePokemonsEvent);
     on<LoadPreviousPokemonsEvent>(_onLoadPreviousPokemonsEvent);
     on<SaveScrollPositionEvent>(_onSaveScrollPositionEvent);
+    on<SearchPokemonEvent>(_onSearchPokemonEvent);
   }
 
   Future<void> _onGetPokemonsEvent(GetPokemonsEvent event, Emitter<PokemonState> emit) async {
@@ -44,7 +49,6 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
 
     savedNamesResult.fold(
       (failure) {
-        // Handle failure if needed
       },
       (savedNames) {
         allPokemonNames = savedNames;
@@ -119,7 +123,7 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
         final result = await getAllPokemons(page: page);
         result.fold(
           (failure) {
-            // Handle error if needed
+            
           },
           (pokemonList) {
             allPokemons.addAll(pokemonList);
@@ -161,10 +165,11 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
           } else {
             _updateAllPokemonNames(pokemonList);
             emit(PokemonLoaded(
-              pokemons: currentState.pokemons + pokemonList,
+              pokemons:  [...currentState.pokemons, ...pokemonList],
               scrollPokemonName: null,
               hasReachedMax: false,
               currentPage: currentPage,
+              isLoadingMore: false,
             ));
           }
         },
@@ -203,5 +208,14 @@ class PokemonBloc extends Bloc<PokemonEvent, PokemonState> {
     }
     print("Saved scroll position: ${event.pokemonName}");
     print("All Pokemon names: $allPokemonNames");
+  }
+
+    Future<void> _onSearchPokemonEvent(SearchPokemonEvent event, Emitter<PokemonState> emit) async {
+    emit(PokemonLoading());
+    final result = await searchPokemons(event.query);
+    result.fold(
+      (failure) => emit(PokemonError(message: 'Failed to search pokemons')),
+      (pokemons) => emit(PokemonLoaded(pokemons: pokemons, hasReachedMax: true, currentPage: 1)),
+    );
   }
 }

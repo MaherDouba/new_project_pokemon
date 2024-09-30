@@ -47,21 +47,24 @@ class PokemonDetailPage extends StatelessWidget {
 
   Widget _buildImageCard() {
     return AspectRatio(
-      aspectRatio: 1, // ضمان أن تكون الصورة مربعة
-      child: Card(
-        margin: EdgeInsets.zero,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        elevation: 8,
-        child: CachedNetworkImage(
-          imageUrl: pokemon.imageUrl,
-          placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-          errorWidget: (context, url, error) => const Icon(Icons.error, size: 100),
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
+      aspectRatio: 1,
+      child: Hero(
+        tag: 'pokemon_image_${pokemon.imageUrl}',
+        child: Card(
+          margin: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 8,
+          child: CachedNetworkImage(
+            imageUrl: pokemon.imageUrl,
+            placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+            errorWidget: (context, url, error) => const Icon(Icons.error, size: 100),
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+          ),
         ),
       ),
     );

@@ -18,6 +18,7 @@ abstract class PokemonLocalDataSource {
 
   Future<void> saveAllPokemonNames(List<String> names);
   Future<List<String>> getAllPokemonNames();
+  Future<List<PokemonModel>> searchPokemons(String query);
 }
 const String ALL_POKEMON_NAMES = "ALL_POKEMON_NAMES";
 
@@ -113,5 +114,24 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
   }
 
 
-
+  @override
+  Future<List<PokemonModel>> searchPokemons(String query) async {
+    final allPokemonNames = await getAllPokemonNames();
+    final filteredNames = allPokemonNames.where((name) => name.toLowerCase().contains(query.toLowerCase())).toList();
+    
+    List<PokemonModel> searchResults = [];
+    for (var name in filteredNames) {
+      for (var page = 1; page <= (allPokemonNames.length / 50).ceil(); page++) {
+        try {
+          final pokemons = await getCachedPokemons(page);
+          final pokemon = pokemons.firstWhere((p) => p.name == name);
+          searchResults.add(pokemon);
+          break;
+        } catch (_) {
+          continue;
+        }
+      }
+    }
+    return searchResults;
+  }
 }

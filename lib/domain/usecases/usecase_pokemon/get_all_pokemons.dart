@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../entities/pokemon.dart';
-import '../repositories/pokemon_repository.dart';
+import '../../entities/pokemon.dart';
+import '../../repositories/pokemon_repository.dart';
 
 class GetAllPokemonsUsecase {
   final PokemonRepository repository;

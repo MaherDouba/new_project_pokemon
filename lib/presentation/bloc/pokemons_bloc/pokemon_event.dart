@@ -21,3 +21,12 @@ class SaveScrollPositionEvent extends PokemonEvent {
   @override
   List<Object> get props => [pokemonName];
 }
+
+class SearchPokemonEvent extends PokemonEvent {
+  final String query;
+
+  const SearchPokemonEvent(this.query);
+
+  @override
+  List<Object> get props => [query];
+}

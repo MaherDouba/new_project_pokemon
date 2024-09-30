@@ -111,4 +111,14 @@ class PokemonRepositoryImpl implements PokemonRepository {
     }
   }
 
+    @override
+  Future<Either<Failure, List<Pokemon>>> searchPokemons(String query) async {
+    try {
+      final localPokemons = await localDataSource.searchPokemons(query);
+      return Right(localPokemons);
+    } on EmptyCacheException {
+      return Left(EmptyCacheFailure());
+    }
+  }
+
 }

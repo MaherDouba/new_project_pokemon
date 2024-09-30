@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/pokemon_bloc.dart';
+import '../bloc/pokemons_bloc/pokemon_bloc.dart';
 
 class PokemonErrorWidget extends StatelessWidget {
   final String message;
