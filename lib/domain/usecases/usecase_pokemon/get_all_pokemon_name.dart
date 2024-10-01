@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../repositories/pokemon_repository.dart';
-import '../../core/error/failures.dart';
+import '../../repositories/pokemon_repository.dart';
+import '../../../core/error/failures.dart';
 
 class GetAllPokemonNames {
   final PokemonRepository repository;

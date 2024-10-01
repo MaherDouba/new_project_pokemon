@@ -16,12 +16,14 @@ class PokemonLoaded extends PokemonState {
   final String? scrollPokemonName;
   final bool hasReachedMax;
   final int currentPage;
+  final bool isLoadingMore;
 
   const PokemonLoaded({
     required this.pokemons,
     this.scrollPokemonName,
     this.hasReachedMax = false,
     required this.currentPage,
+    this.isLoadingMore = false,
   });
 
   PokemonLoaded copyWith({
@@ -29,12 +31,14 @@ class PokemonLoaded extends PokemonState {
     String? scrollPokemonName,
     bool? hasReachedMax,
     int? currentPage,
+    bool? isLoadingMore,
   }) {
     return PokemonLoaded(
       pokemons: pokemons ?? this.pokemons,
       scrollPokemonName: scrollPokemonName ?? this.scrollPokemonName,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       currentPage: currentPage ?? this.currentPage,
+       isLoadingMore: isLoadingMore ?? this.isLoadingMore, 
     );
   }
 

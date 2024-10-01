@@ -10,4 +10,5 @@ abstract class PokemonRepository {
   Future<int> getCurrentPage();
   Future<Either<Failure, void>> saveAllPokemonNames(List<String> names);
   Future<Either<Failure, List<String>>> getAllPokemonNames();
+  Future<Either<Failure, List<Pokemon>>> searchPokemons(String query);
 }

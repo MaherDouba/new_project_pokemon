@@ -1,4 +1,4 @@
-import '../repositories/pokemon_repository.dart';
+import '../../repositories/pokemon_repository.dart';
 
 class SaveCurrentPage {
   final PokemonRepository repository;
