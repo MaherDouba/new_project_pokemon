@@ -81,7 +81,7 @@ Future<void> init() async {
   sl.registerLazySingleton<ThemeLocalDataSource>(() => ThemeLocalDataSourceImpl(sharedPreferences: sl()));
 
   // Core
-  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfo());
+  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());
 
   // External
   final sharedPreferences = await SharedPreferences.getInstance();
