@@ -17,7 +17,7 @@ class PokemonDetailPage extends StatelessWidget {
         title: Text(pokemon.name, textAlign: TextAlign.center),
         centerTitle: true,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: useVerticalLayout ? _buildVerticalLayout() : _buildHorizontalLayout(),
       ),
