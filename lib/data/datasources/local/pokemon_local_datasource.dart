@@ -6,20 +6,17 @@ import '../../models/pokemon_model.dart';
 abstract class PokemonLocalDataSource {
   Future<List<PokemonModel>> getCachedPokemons(int page);
   Future<void> cachePokemons(List<PokemonModel> pokemons, int page);
-
   Future<void> saveScrollPosition( String pokemonName);
   Future<String?> getScrollPosition();
-
   Future<void> saveCurrentPage(int page);
   Future<int> getCurrentPage();
-  
   Future<List<int>> getCachedPages();
   Future<int> getNextCachedPage(int currentPage);
-
   Future<void> saveAllPokemonNames(List<String> names);
   Future<List<String>> getAllPokemonNames();
   Future<List<PokemonModel>> searchPokemons(String query);
 }
+
 const String ALL_POKEMON_NAMES = "ALL_POKEMON_NAMES";
 
 const CACHED_POKEMONS = 'CACHED_POKEMONS_PAGE_';
