@@ -15,7 +15,7 @@ void main() {
       app.main();
       await tester.pumpAndSettle();
 
-      // Verify that PokemonListScreen is the initial route
+// Verify that PokemonListScreen is the initial route
       await tester.pump();
       expect(find.byType(PokemonListScreen), findsOneWidget);
 
@@ -36,10 +36,11 @@ void main() {
       expect(find.byType(PokemonDetailPage), findsOneWidget);
 
       // Go back to PokemonListScreen
-      await tester.pump();
+      await tester.pumpAndSettle();
       await tester.tap(find.byType(BackButton));  
 
 // Test search functionality
+      await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.search));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'Bulbasaur');
@@ -50,6 +51,7 @@ void main() {
       expect(find.text('Bulbasaur'), findsOneWidget);
 
 // closse search
+      await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.close));
       await tester.pumpAndSettle();
 
