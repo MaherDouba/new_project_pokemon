@@ -59,6 +59,7 @@ void main() {
       // assert
       verify(mockSharedPreferences.setString('language_code', 'ar'));
     });
+  
   });
 
 }

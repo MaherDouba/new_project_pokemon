@@ -11,6 +11,7 @@ import '../widgets/app_drawer.dart';
 import 'pokemon_detail_screen.dart';
 
 class PokemonListScreen extends StatefulWidget {
+  
   @override
   _PokemonListScreenState createState() => _PokemonListScreenState();
 }
@@ -58,6 +59,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
    @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: Key("AppDrawer"),
       drawer: AppDrawer(),
       appBar: AppBar(
         title: _isSearching
@@ -120,6 +122,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: TextField(
+      //  key: Key("Search_Pokemon"),
         controller: _searchController,
         autofocus: true,
         decoration: InputDecoration(
@@ -188,11 +191,11 @@ itemBuilder: (context, index) {
                 ));
           }
         },
-                  child: PokemonCard(
+                  child: PokemonCard(       
                     pokemon: pokemon,
-                    onTap: () => Navigator.push(
+                    onTap: () => Navigator.push(     
                       context,
-                      MaterialPageRoute(
+                      MaterialPageRoute(     
                         builder: (context) => PokemonDetailPage(pokemon: pokemon),
                       ),
                     ),

@@ -12,6 +12,7 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      key: Key("Drawer"),
       child: ListView(
         children: [
           const DrawerHeader(
@@ -43,6 +44,7 @@ class AppDrawer extends StatelessWidget {
                 ),
                 leading: const Icon(Icons.brightness_4),
                 trailing: Switch(
+                  key: Key('Switch'),
                   value: state is ThemeLoaded ? state.isDarkMode : false,
                   onChanged: (value) {
                     context.read<ThemeBloc>().add(ChangeThemeEvent(value));
