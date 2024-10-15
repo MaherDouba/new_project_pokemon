@@ -20,6 +20,8 @@ void main() {
       exp: 112,
      url: 'url',
     );
+      print('Widget Tree:');
+      print(tester.allWidgets);
 
     await mockNetworkImagesFor(() async {
       await tester.pumpWidget(MaterialApp(
